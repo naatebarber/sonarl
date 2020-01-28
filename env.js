@@ -41,10 +41,10 @@ class PilotMap {
     step(action) {
         switch(action) {
             case 0: // north
-                this.env.velocity.y -= 0.2;
+                this.env.velocity.y += 0.2;
                 break;
             case 1: // south
-                this.env.velocity.y += 0.2;
+                this.env.velocity.y -= 0.2;
                 break;
             case 2: // east
                 this.env.velocity.x += 0.2;
