@@ -9,4 +9,7 @@ app.use(express.static(__dirname + "/ui"))
         ws.send("ws available")
         ws.send("another");
     })
+    .get("/env", (req, res) => {
+        
+    })
     .listen(process.env.GUI_PORT, () => console.log("GUI running on " + process.env.GUI_PORT))
