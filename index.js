@@ -13,3 +13,7 @@ app.use(express.static(__dirname + "/ui"))
         
     })
     .listen(process.env.GUI_PORT, () => console.log("GUI running on " + process.env.GUI_PORT))
+
+function initialize() {
+    
+}

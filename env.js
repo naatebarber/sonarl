@@ -1,82 +1,78 @@
-class PilotMap {
-    constructor(init_velocity = {x, y}, spawn_padding = 10, direction = "north", map_size = 150) {
-        this.init_velocity = init_velocity;
-        this.spawn_padding = spawn_padding;
-        this.direction = direction;
-        this.map_size = map_size;
-        this.env = null;
+class SonarEnv {
+    constructor(map_size = 200, spawn_padding = 50, max_theta, max_velocity, motor_pwm_values = []) {
+        this.map_size = map_size || 200;
+        this.spawn_padding = spawn_padding || 50;
+        this.motor_input_values = motor_input_values || this._generate_random_motor_input();
+        this.position = this._generate_random_spawn_position();
+        this.velocity = [];
+        this.theta = this.generate_random_theta();
+        this.max_theta = max_theta;
+        this.max_velocity = max_velocity;
     }
 
-    generate_env() {
-        return {
-            x_max: Math.floor(this.map_size / 2),
-            x_min: -1 * Math.floor(this.map_size / 2),
-            y_max: Math.floor(this.map_size / 2),
-            y_min: -1 * Math.floor(this.map_size / 2),
-            location: {
-                x: (Math.random() * (this.map_size - 2 * this.spawn_padding)) + this.spawn_padding, 
-                y: (Math.random() * (this.map_size - 2 * this.spawn_padding)) + this.spawn_padding
-            },
-            velocity: {
-                x: this.init_velocity.x,
-                y: this.init_velocity.y
-            },
-            in_bounds: true
+    _generate_random_motor_input() {
+        // throttle roll pitch yaw
+        let motor_inputs = [];
+        for(let i = 0; i < 4; i++) motor_inputs.push(Math.random() * 0.5 + 0.25)
+        return motor_inputs;
+    }
+
+    _generate_random_theta() {
+        let thetas = [];
+        for(let i = 0; i < 3; i++) {
+            thetas.push(((Math.random() * 2) - 1) * this.max_theta);
         }
+        return thetas;
     }
 
-    _in_bounds() {
-        return (this.env.location.x > -1 * (this.map_size / 2) && this.env.location.x < (this.map_size / 2))
-                && (this.env.location.y > -1 * (this.map_size / 2) && this.env.location.y < (this.map_size / 2))
+    _generate_random_spawn_position() {
+        let position = [];
+        for(let i = 0; i < 3; i++) position.push(Math.random() * (this.map_size - 2 * this.spawn_padding) + this.spawn_padding)
+        return position;
     }
 
-    _distance_from_center() {
-        return Math.sqrt(Math.pow(this.env.location.x, 2) + Math.pow(this.env.location.y, 2))
+    _get_sonar() {
+        return [
+            this.position[2],
+            this.map_size - this.position[2],
+            this.position[0],
+            this.map_size - this.position[0],
+            this.position[1],
+            this.map_size - this.position[1]
+        ]
     }
 
-    observation() {
-        return this.env
+    _get_reward() {
+        let distance_reward_vecs = [];
+        for(let i of this.position) {
+            distance_reward_vecs.push(
+                Math.pow(1 - (((this.map_size / 2) % i) || 0.01) / (this.map_size / 2), 2)
+            )
+        }
+        return distance_reward_vecs.reduce((a, b) => a + b) / this.position.length;
+    }
+
+    _is_done() {
+        for(let i of this.position) if(i > this.map_size || i < 0) return true;
+        return false;
     }
 
     step(action) {
-        switch(action) {
-            case 0: // north
-                this.env.velocity.y += 0.2;
-                break;
-            case 1: // south
-                this.env.velocity.y -= 0.2;
-                break;
-            case 2: // east
-                this.env.velocity.x += 0.2;
-                break;
-            case 3: // west
-                this.env.velocity.x -= 0.2
-                break;
-            default:
-                throw new Error("Invalid action, select 0-3")
-        }
-        this.env.location.x += this.env.velocity.x;
-        this.env.location.y += this.env.velocity.y;
-        this.env.in_bounds = this._in_bounds();
-        if(this.env.in_bounds) 
-            return {
-                o: this.env,
-                r: Math.pow(this._distance_from_center() / (this.map_size / 2), 2),
-                d: !this.env.in_bounds
-            }
-        return {
-            o: null,
-            r: 0,
-            d: !this.env.in_bounds
-        }
-    }
-
-    reset() {
-        this.env = this.generate_env()
-        return this.env;
+        if(!(action.length == 4)) throw new Error("Need 4 float inputs");
+        this.motor_input_values = action;
+        this.theta[0] = (this.motor_input_values[1] - 0.5) * this.max_theta * 2;
+        this.theta[1] = (this.motor_input_values[2] - 0.5) * this.max_theta * 2;
+        thrust_level = (this.motor_input_values[0] * this.max_velocity)
+        this.velocity[0] += thrust_level * Math.cos(this.theta[0]);
+        this.velocity[1] += thrust_level - 9.8;
+        this.velocity[3] += thrust_level * Math.cos(this.theta[1]);
+        this.position[0] += this.velocity[0];
+        this.position[1] += this.velocity[1];
+        this.position[2] += this.velocity[2];
+        return [this._get_sonar(), this._get_reward(), this._is_done()];
     }
 }
 
 module.exports = {
-    pilot: PilotMap
+    SonarEnv
 }
