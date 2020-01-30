@@ -19,5 +19,5 @@ Python package for handling socket connections, translating values to agent-read
 ## Current ENV Observation/Actions/Reward/Done   
 O: 6 'sonar' values, `((1, front), (2, left), (3, right), (4, back), (5, top), (6, bottom))`  
 A: Array of four floats, each representing change in motor power `((1, front-left), (2, front-right), (3, back-right), (4, back-left))`  
-R: `(distance_from_center / max_distance_from_center) ^ 2`  
+R: `Math.pow(1 - (((this.map_size / 2) % i) || 0.01) / (this.map_size / 2), 2)` - mean of dimensional vectors   
 D: Agent exceeds max_distance_from_center  
