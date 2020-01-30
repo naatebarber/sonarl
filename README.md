@@ -1,12 +1,14 @@
 # sonarl  
 Sonar based autopilot simulation
 
-### env.js  
-Contains an object containing different environment classes.
-
 ### index.js  
-Websocket server for connecting agent updates to web interface.  
-Endpoints for env operations
+Websocket server for connecting agent updates to web interface and connective mesh.  
+
+### src/socket.js  
+Env-agent communication handler. Updates websockets with recent data and activates env methods.
+
+### src/env.js  
+Contains an object containing different environment classes and methods.
 
 ### client/*  
 Client code for displaying environment and success of DQN
