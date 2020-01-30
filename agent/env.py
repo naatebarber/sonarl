@@ -7,15 +7,17 @@ class Env:
         self.socket.connect(address)
 
     def reset(self):
-        self.socket.send_data(json.dumps({
-            'env_action': "reset",
-            'params': {}
-        }))
+        self.socket.send_data(bytes(json.dumps({
+            'env_action': 'reset',
+            'params': None
+        }), "utf-8"))
+        res = self.socket.recv_data().decode("utf-8")
+        print(res)
 
     def step(self, action):
         if isinstance(action, dict): action = json.dumps(action)
         self.socket.send_data(bytes(json.dumps({
-            'env_action': "step",
+            'env_action': 'step',
             'params': {
                 'action': action
             }
@@ -26,7 +28,7 @@ class Env:
         return res_dict
 
     def observation_space(self):
-        self.socket.send_data(json.dumps({
+        self.socket.send_data(bytes(json.dumps({
             'env_action': "get_observation",
-            'params': {}
-        }))
+            'params': None
+        }), "utf-8"))

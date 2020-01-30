@@ -6,7 +6,8 @@ const express = require("express"),
     expressws = require("express-ws")(app),
     bodyparser = require("body-parser"),
     socketServerConf = {
-        subscribews: undefined
+        env: undefined,
+        ws: undefined
     }
     socketServer = initSocket(socketServerConf),
     envs = [];

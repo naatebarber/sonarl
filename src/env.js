@@ -1,11 +1,11 @@
 class SonarEnv {
-    constructor(map_size = 200, spawn_padding = 50, max_theta, max_velocity, motor_pwm_values = []) {
+    constructor(map_size = 200, spawn_padding = 50, max_theta, max_velocity, motor_input_values = []) {
         this.map_size = map_size || 200;
         this.spawn_padding = spawn_padding || 50;
         this.motor_input_values = motor_input_values || this._generate_random_motor_input();
         this.position = this._generate_random_spawn_position();
         this.velocity = [];
-        this.theta = this.generate_random_theta();
+        this.theta = this._generate_random_theta();
         this.max_theta = max_theta;
         this.max_velocity = max_velocity;
     }
@@ -61,6 +61,7 @@ class SonarEnv {
         this.motor_input_values = this._generate_random_motor_input();
         this.position = this._generate_random_spawn_position();
         this.theta = this._generate_random_theta();
+        return this.get_observation();
     }
 
     step(action) {
@@ -83,12 +84,12 @@ class SonarEnv {
     }
 }
 
-const EnvCommandMap = env => (command, params) => {
+const envCommandMap = env => (command, params) => {
     switch(command) {
         case "reset":
             return env.reset();
         case "step":
-            return env.step(params);
+            return env.step(params.action);
         case "get_observation":
             return env.get_observation();
         default: return null;
@@ -97,5 +98,5 @@ const EnvCommandMap = env => (command, params) => {
 
 module.exports = {
     SonarEnv,
-    EnvCommandMap
+    envCommandMap
 }
