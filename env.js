@@ -57,6 +57,12 @@ class SonarEnv {
         return false;
     }
 
+    reset() {
+        this.motor_input_values = this._generate_random_motor_input();
+        this.position = this._generate_random_spawn_position();
+        this.theta = this._generate_random_theta();
+    }
+
     step(action) {
         if(!(action.length == 4)) throw new Error("Need 4 float inputs");
         this.motor_input_values = action;
@@ -69,6 +75,10 @@ class SonarEnv {
         this.position[0] += this.velocity[0];
         this.position[1] += this.velocity[1];
         this.position[2] += this.velocity[2];
+        return [this._get_sonar(), this._get_reward(), this._is_done()];
+    }
+
+    get_observation() {
         return [this._get_sonar(), this._get_reward(), this._is_done()];
     }
 }
