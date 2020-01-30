@@ -83,6 +83,19 @@ class SonarEnv {
     }
 }
 
+const EnvCommandMap = env => (command, params) => {
+    switch(command) {
+        case "reset":
+            return env.reset();
+        case "step":
+            return env.step(params);
+        case "get_observation":
+            return env.get_observation();
+        default: return null;
+    }
+}
+
 module.exports = {
-    SonarEnv
+    SonarEnv,
+    EnvCommandMap
 }
