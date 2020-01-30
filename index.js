@@ -5,7 +5,7 @@ const express = require("express"),
     expressws = require("express-ws")(app);
 
 app.use(express.static(__dirname + "/ui"))
-    .ws("/update", (ws, req) => {
+    .ws("/gui", (ws, req) => {
         console.log("Connection made");
         ws.send("ws available")
         ws.send("another");
@@ -21,6 +21,9 @@ function initialize() {
             sock.on("data", data => {
                 const stringData = data.toString("utf-8");
                 console.log(stringData);
+                sock.write(Buffer.from(JSON.stringify({
+                    did: "Get your data"
+                })))
             });
         }).listen(process.env.SOCKET_SERVER_PORT, null, null, () => {
             console.log("Socket server listening on " + process.env.SOCKET_SERVER_PORT)

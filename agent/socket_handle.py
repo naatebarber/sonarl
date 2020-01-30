@@ -9,6 +9,10 @@ class Socket:
 
     def send_data(self, data):
         self.client.send(data)
+    
+    def recv_data(self):
+        data = self.client.recv(4096)
+        return data
 
     def close(self):
         self.client.close()
