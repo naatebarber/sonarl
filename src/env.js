@@ -72,7 +72,7 @@ class SonarEnv {
     }
 
     step(action) {
-        if(!(action.length == 4)) throw new Error("Need 4 float inputs");
+        if(!(action.length == 4)) throw new Error(`Need float inputs. Instead got ${action} of type ${typeof action}`);
         this.motor_input_values = action;
         this.theta[0] = (this.motor_input_values[1] - 0.5) * this.max_theta * 2;
         this.theta[1] = (this.motor_input_values[2] - 0.5) * this.max_theta * 2;
@@ -87,7 +87,7 @@ class SonarEnv {
     }
 
     get_observation() {
-        return [this._get_sonar(), this._get_reward(), this._is_done()];
+        return this._get_sonar();
     }
 
     sample_random_action(delta = 0.25) {

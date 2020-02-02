@@ -1,5 +1,5 @@
 # sonarl  
-Sonar based autopilot simulation
+Sonar based autopilot simulation (UNDER CONSTRUCTION)
 
 ### index.js  
 Websocket server for connecting agent updates to web interface and connective mesh.  

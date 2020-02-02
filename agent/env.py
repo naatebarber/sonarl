@@ -17,6 +17,10 @@ class Env:
         return res_dict['ordi']
 
     def step(self, action):
+        try:
+            action = action.tolist()
+        except:
+            pass
         if isinstance(action, dict): action = json.dumps(action)
         print(action)
         self.socket.send_data(bytes(json.dumps({

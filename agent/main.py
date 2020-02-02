@@ -22,6 +22,7 @@ if __name__ == "__main__":
     num_episodes = 10
 
     with tf.Session() as sess:
+        sess.run(model._var_init)
         runner = src.Runner(sess, env, model, memory, 0.8, 1e-5, .95)
         for i in range(num_episodes):
             runner.run()

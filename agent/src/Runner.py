@@ -18,6 +18,7 @@ class Runner:
 
     def run(self):
         state = self._env.reset()
+        print(state)
         tot_reward = 0
 
         while True:
@@ -63,12 +64,15 @@ class Runner:
         y = np.zeros((len(batch), self._model._num_actions))
         for i, b in enumerate(batch):
             state, action, reward, next_state = b[0], b[1], b[2], b[3]
+            print("ACTION {}".format(action))
             current_q = q_s_a[i]
+
+            # Structure the training data
 
             if next_state is None:
                 current_q[action] = reward
             else:
-                current_q[action] = reward + 0.95 * np.amax(qsad[i])
+                current_q[action] = reward + 0.95 * np.amax(q_s_a_d[i])
 
             x[i] = state
             y[i] = current_q
