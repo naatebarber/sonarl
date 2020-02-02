@@ -11,24 +11,42 @@ class Env:
             'env_action': 'reset',
             'params': None
         }), "utf-8"))
-        res = self.socket.recv_data().decode("utf-8")
-        print(res)
+        res_reset = self.socket.recv_data()
+        res = res_reset.decode("utf-8")
+        res_dict = json.loads(res)
+        return res_dict['ordi']
 
     def step(self, action):
         if isinstance(action, dict): action = json.dumps(action)
+        print(action)
         self.socket.send_data(bytes(json.dumps({
             'env_action': 'step',
             'params': {
                 'action': action
             }
         }), "utf-8"))
-        res_bytes = self.socket.recv_data()
-        res = res_bytes.decode("utf-8")
+        res_step = self.socket.recv_data()
+        res = res_step.decode("utf-8")
+        print("Step data: {}".format(res))
         res_dict = json.loads(res)
-        return res_dict
+        return res_dict['ordi']
 
     def observation_space(self):
         self.socket.send_data(bytes(json.dumps({
-            'env_action': "get_observation",
+            'env_action': 'get_observation',
             'params': None
         }), "utf-8"))
+        res_obs = self.socket.recv_data()
+        res = res_obs.decode("utf-8")
+        res_dict = json.loads(res)
+        return res_dict['ordi']
+
+    def sample_random_action(self):
+        self.socket.send_data(bytes(json.dumps({
+            'env_action': 'sample_random_action',
+            'params': None
+        }), "utf-8"))
+        res_sample = self.socket.recv_data()
+        res = res_sample.decode("utf-8")
+        res_dict = json.loads(res)
+        return res_dict['ordi']

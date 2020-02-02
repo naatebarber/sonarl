@@ -1,13 +1,14 @@
 class SonarEnv {
-    constructor(map_size = 200, spawn_padding = 50, max_theta, max_velocity, motor_input_values = []) {
+    constructor(map_size = 200, spawn_padding = 50, max_theta = Math.PI / 9, max_velocity = 20, motor_input_values) {
         this.map_size = map_size || 200;
         this.spawn_padding = spawn_padding || 50;
+        this.max_theta = max_theta || Math.PI / 9;
+        this.max_velocity = max_velocity || 20;
         this.motor_input_values = motor_input_values || this._generate_random_motor_input();
         this.position = this._generate_random_spawn_position();
-        this.velocity = [];
+        this.velocity = this._generate_random_spawn_velocity();
         this.theta = this._generate_random_theta();
-        this.max_theta = max_theta;
-        this.max_velocity = max_velocity;
+        
     }
 
     _generate_random_motor_input() {
@@ -29,6 +30,12 @@ class SonarEnv {
         let position = [];
         for(let i = 0; i < 3; i++) position.push(Math.random() * (this.map_size - 2 * this.spawn_padding) + this.spawn_padding)
         return position;
+    }
+
+    _generate_random_spawn_velocity() {
+        let velocity = [];
+        for(let i = 0; i < 3; i++) velocity.push((Math.random() * 2 * this.max_velocity) - this.max_velocity)
+        return velocity;
     }
 
     _get_sonar() {
@@ -69,7 +76,7 @@ class SonarEnv {
         this.motor_input_values = action;
         this.theta[0] = (this.motor_input_values[1] - 0.5) * this.max_theta * 2;
         this.theta[1] = (this.motor_input_values[2] - 0.5) * this.max_theta * 2;
-        thrust_level = (this.motor_input_values[0] * this.max_velocity)
+        let thrust_level = (this.motor_input_values[0] * this.max_velocity);
         this.velocity[0] += thrust_level * Math.cos(this.theta[0]);
         this.velocity[1] += thrust_level - 9.8;
         this.velocity[3] += thrust_level * Math.cos(this.theta[1]);
@@ -82,6 +89,13 @@ class SonarEnv {
     get_observation() {
         return [this._get_sonar(), this._get_reward(), this._is_done()];
     }
+
+    sample_random_action(delta = 0.25) {
+        for(var i = 0; i < this.motor_input_values.length; i++) {
+            this.motor_input_values[i] = Math.abs(this.motor_input_values[i] + Math.random() * delta)
+        }
+        return this.motor_input_values
+    }
 }
 
 const envCommandMap = env => (command, params) => {
@@ -92,6 +106,8 @@ const envCommandMap = env => (command, params) => {
             return env.step(params.action);
         case "get_observation":
             return env.get_observation();
+        case "sample_random_action":
+            return env.sample_random_action();
         default: return null;
     }
 }
