@@ -22,7 +22,8 @@ const initializeSocketServer = conf => {
                     if(ws && env_action == "step") ws.send(JSON.stringify({
                         env_action: env_action,
                         action: params,
-                        position: env.position
+                        position: env.position,
+                        map_size: env.map_size
                     }))
                 } catch(err) {
                     console.log("Error recv agent-sock data: " + err)
