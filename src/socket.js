@@ -7,18 +7,26 @@ const initializeSocketServer = conf => {
     sockServer
         .on("connection", sock => {
             sock.on("data", data => {
-                var { env, ws } = conf;
-                if(ws) ws.send(data.toString("utf-8"));
-                if(!env) env = new envlib.SonarEnv();
+                try {
+                    var { env, ws } = conf;
 
-                const { env_action, params } = JSON.parse(data.toString("utf-8"));
-                const ordi = commandMap(env)(env_action, params);
+                    const { env_action, params } = JSON.parse(data.toString("utf-8"));
+                    const ordi = commandMap(env)(env_action, params);
 
-                sock.write(Buffer.from(JSON.stringify({
-                    env_action: env_action,
-                    success: Array.isArray(ordi),
-                    ordi: ordi
-                })))
+                    sock.write(Buffer.from(JSON.stringify({
+                        env_action: env_action,
+                        success: Array.isArray(ordi),
+                        ordi: ordi
+                    })));
+
+                    if(ws && env_action == "step") ws.send(JSON.stringify({
+                        env_action: env_action,
+                        action: params,
+                        position: env.position
+                    }))
+                } catch(err) {
+                    console.log("Error recv agent-sock data: " + err)
+                }
             });
         })
         .listen(process.env.SOCKET_SERVER_PORT, null, null, () => {

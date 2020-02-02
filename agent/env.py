@@ -22,7 +22,6 @@ class Env:
         except:
             pass
         if isinstance(action, dict): action = json.dumps(action)
-        print(action)
         self.socket.send_data(bytes(json.dumps({
             'env_action': 'step',
             'params': {
@@ -31,7 +30,6 @@ class Env:
         }), "utf-8"))
         res_step = self.socket.recv_data()
         res = res_step.decode("utf-8")
-        print("Step data: {}".format(res))
         res_dict = json.loads(res)
         return res_dict['ordi']
 

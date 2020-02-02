@@ -9,7 +9,6 @@ import numpy as np
 if __name__ == "__main__":
     env_address = ("localhost", int(os.getenv("SOCKET_SERVER_PORT")))
     env = env.Env(env_address, {})
-    print(env.sample_random_action())
 
     num_states = 6
     num_actions = 4
@@ -26,3 +25,4 @@ if __name__ == "__main__":
         runner = src.Runner(sess, env, model, memory, 0.8, 1e-5, .95)
         for i in range(num_episodes):
             runner.run()
+            print("Episode {}".format(i))

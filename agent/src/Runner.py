@@ -18,12 +18,10 @@ class Runner:
 
     def run(self):
         state = self._env.reset()
-        print(state)
         tot_reward = 0
 
         while True:
             action = self.choose_action(state)
-            print(action)
             next_state, reward, done = self._env.step(action)
 
             # reward modifier?
@@ -32,21 +30,22 @@ class Runner:
                 next_state = None
 
             self._memory.add_sample((state, reward, action, next_state))
-            self.replay()
+            # self.replay()
 
-            self.steps += 1
+            self._steps += 1
             self._eps = self._min_eps + (self._max_eps) * (self._decay)
 
             state = next_state
             tot_reward += reward
 
+            print(done)
             if done is True:
                 self._reward_store.append(tot_reward)
                 break
         print("Episode reward: {}".format(tot_reward))
 
     def choose_action(self, state):
-        if random.random() < self._eps:
+        if random.random() < 1:
             return self._env.sample_random_action()
         else:
             return self._model.predict_one(np.array(tuple(state)), self._sess)
@@ -64,7 +63,6 @@ class Runner:
         y = np.zeros((len(batch), self._model._num_actions))
         for i, b in enumerate(batch):
             state, action, reward, next_state = b[0], b[1], b[2], b[3]
-            print("ACTION {}".format(action))
 
             # Structure the training data
 

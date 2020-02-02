@@ -6,7 +6,7 @@ const express = require("express"),
     expressws = require("express-ws")(app),
     bodyparser = require("body-parser"),
     socketServerConf = {
-        env: undefined,
+        env: new envlib.SonarEnv(200, 50, Math.PI / 18, 1),
         ws: undefined
     }
     socketServer = initSocket(socketServerConf),
@@ -16,9 +16,9 @@ app.use(express.static(__dirname + "/ui"))
     .use(bodyparser.json())
     .use(bodyparser.urlencoded({extended: false}))
     .ws("/gui", (ws, req) => {
-        socketServerConf.subscribews = ws;
+        socketServerConf.ws = ws;
         console.log("Connection made");
-        ws.send("ws available")
+        ws.send("ws available");
         ws.send("another");
     })
     .post("/init-env", (req, res) => {
