@@ -65,16 +65,10 @@ class Runner:
         for i, b in enumerate(batch):
             state, action, reward, next_state = b[0], b[1], b[2], b[3]
             print("ACTION {}".format(action))
-            current_q = q_s_a[i]
 
             # Structure the training data
 
-            if next_state is None:
-                current_q[action] = reward
-            else:
-                current_q[action] = reward + 0.95 * np.amax(q_s_a_d[i])
-
-            x[i] = state
-            y[i] = current_q
+            x[i] = None #?
+            y[i] = None #?
 
         self._model.train_batch(self._sess, x, y)
