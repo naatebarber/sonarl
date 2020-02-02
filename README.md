@@ -1,7 +1,5 @@
 # sonarl  
-Sonar based autopilot simulation (UNDER CONSTRUCTION)
 Temporal learning with Deep Q Network, utilizing experience replay
-Sonar based autopilot simulation (construction)
 
 ### index.js  
 Websocket server for connecting agent updates to web interface and connective mesh.  
