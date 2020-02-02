@@ -1,5 +1,5 @@
 # sonarl  
-Temporal learning with Deep Q Network, utilizing experience replay
+Temporal difference learning with Deep Q Network, utilizing experience replay
 
 ### index.js  
 Websocket server for connecting agent updates to web interface and connective mesh.  
