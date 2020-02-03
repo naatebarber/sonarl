@@ -24,5 +24,5 @@ if __name__ == "__main__":
         sess.run(model._var_init)
         runner = src.Runner(sess, env, model, memory, 0.8, 1e-5, .95)
         for i in range(num_episodes):
-            runner.run()
             print("Episode {}".format(i))
+            runner.run()

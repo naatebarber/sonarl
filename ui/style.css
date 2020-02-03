@@ -10,6 +10,34 @@ body {
     margin: 50px;
 }
 
+.run-agent span {
+    padding: 10px;
+    background-color: #efefef;
+    color: #888;
+    border-radius: 4px;
+    font-size: 20px;
+    transition: all 120ms ease-in;
+    cursor: pointer;
+    user-select: none;
+}
+
+.run-agent span:hover {
+    background-color: #ddd;
+}
+
+.run-agent-log {
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #efefef;
+    color: #888;
+    font-size: 18px;
+    padding: 10px;
+    display: none;
+    max-height: 500px;
+    overflow-y: scroll;
+}
+
 .vis {
     margin-left: auto;
     margin-right: auto;

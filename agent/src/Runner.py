@@ -38,7 +38,6 @@ class Runner:
             state = next_state
             tot_reward += reward
 
-            print(done)
             if done is True:
                 self._reward_store.append(tot_reward)
                 break

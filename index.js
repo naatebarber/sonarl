@@ -1,5 +1,6 @@
 const express = require("express"),
     net = require("net"),
+    spawn = require("child_process").spawn,
     app = express(),
     envlib = require("./src/env"),
     initSocket = require("./src/socket"),
@@ -18,8 +19,14 @@ app.use(express.static(__dirname + "/ui"))
     .ws("/gui", (ws, req) => {
         socketServerConf.ws = ws;
         console.log("Connection made");
-        ws.send("ws available");
-        ws.send("another");
+    })
+    .post("/run-agent", (req, res) => {
+        let agentSession = spawn("python", [__dirname + "/agent/main.py"]),
+            log = '';
+        agentSession.stdout.on("data", data => log += data.toString("utf-8").replace(/\n/g, "<br>"))
+        agentSession.on("exit", () => {
+            res.send(log);
+        });
     })
     .post("/init-env", (req, res) => {
         // GUI ENV Generation endpoint WIP
