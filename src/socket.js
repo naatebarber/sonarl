@@ -21,7 +21,8 @@ const initializeSocketServer = conf => {
 
                     if(ws && env_action == "step") ws.send(JSON.stringify({
                         graph: {
-                            position: env.position
+                            position: env.position,
+                            reward: [ordi[1]]
                         }
                     }))
                 } catch(err) {

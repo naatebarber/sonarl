@@ -15,6 +15,10 @@ body {
     margin-right: auto;
 }
 
+svg {
+    margin-bottom: 50px;
+}
+
 .line {
     fill: none;
     stroke-width: 1;
