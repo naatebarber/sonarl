@@ -78,7 +78,7 @@ class SonarEnv {
         this.theta[1] = (this.motor_input_values[2] - 0.5) * this.max_theta * 2;
         let thrust_level = (this.motor_input_values[0] * this.max_velocity);
         this.velocity[0] += thrust_level * Math.cos(this.theta[0]);
-        this.velocity[1] += thrust_level - 9.8;
+        this.velocity[1] += thrust_level;
         this.velocity[3] += thrust_level * Math.cos(this.theta[1]);
         this.position[0] += this.velocity[0];
         this.position[1] += this.velocity[1];

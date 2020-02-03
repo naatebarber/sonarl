@@ -33,7 +33,7 @@ class Runner:
             # self.replay()
 
             self._steps += 1
-            self._eps = self._min_eps + (self._max_eps) * (self._decay)
+            self._eps = self._min_eps + (self._eps * self._decay)
 
             state = next_state
             tot_reward += reward
@@ -44,10 +44,11 @@ class Runner:
         print("Episode reward: {}".format(tot_reward))
 
     def choose_action(self, state):
-        if random.random() < 1:
+        print("Current epsilon: {}".format(self._eps))
+        if random.random() < self._eps:
             return self._env.sample_random_action()
         else:
-            return self._model.predict_one(np.array(tuple(state)), self._sess)
+            return self._model.predict_one(np.array(tuple(state)), self._sess).reshape([4])
 
     def replay(self):
         batch = self._memory.sample(self._model._batch_size)
@@ -65,7 +66,7 @@ class Runner:
 
             # Structure the training data
 
-            x[i] = None #?
-            y[i] = None #?
+            x[i] = state #?
+            y[i] = [act * reward for act in q_s_a_d] #?
 
         self._model.train_batch(self._sess, x, y)

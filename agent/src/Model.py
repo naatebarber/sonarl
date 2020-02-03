@@ -23,7 +23,7 @@ class Model:
         # define hidden layers
         hl1 = tf.layers.dense(self._states, 50, tf.nn.relu)
         hl2 = tf.layers.dense(hl1, 50, tf.nn.relu)
-        self._logits = tf.layers.dense(hl2, self._num_actions, name="Prediction")
+        self._logits = tf.nn.softmax(tf.layers.dense(hl2, self._num_actions, name="Prediction"))
         # define loss and optimizer
         loss = tf.losses.mean_squared_error(self._q_s_a, self._logits)
         self._optimizer = tf.train.AdamOptimizer().minimize(loss)
