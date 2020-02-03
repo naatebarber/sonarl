@@ -2,8 +2,8 @@ $(document).ready(() => {
     var ws = new WebSocket("ws://localhost:8080/gui", "protocolOne"),
         store = {},
         svgParams = {
-            w: window.innerWidth / 1.5,
-            h: window.innerWidth / 1.5,
+            w: (window.innerWidth / 1.5) < 600 ? (window.innerWidth / 1.5) : 600,
+            h: (window.innerWidth / 1.5) < 600 ? (window.innerWidth / 1.5) : 600,
             m: 40
         },
         svg = {};
