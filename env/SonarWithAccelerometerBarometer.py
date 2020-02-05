@@ -19,6 +19,10 @@ class SonarWithAcceleromenterBarometer:
         self.velocity = velocity
         return self
 
+    def set_init_nonzero_yaw(self):
+        self.yaw_angle = np.random.randint(0, 360)
+        return self
+
     def ordi(self):
         pass
 
