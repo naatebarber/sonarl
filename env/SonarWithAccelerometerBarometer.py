@@ -24,7 +24,71 @@ class SonarWithAcceleromenterBarometer:
         return self
 
     def ordi(self):
-        pass
+        # calculate sonar top/bottom (independent of yaw)
+        sonar_top = self.bound - self.position[3]
+        sonar_bottom = self.bound * 2 - sonar_top
+
+        '''
+        calculate sonar that changes as a result of yaw
+        find hypotenuse to be = distance_from_face_n / cosine(degrees_yaw)
+
+                    z face 0
+                    - - - - 
+                   |       | 
+         x face 0  |  x z  |  x face 1
+                   |       |
+                    - - - - 
+                    z face 2
+
+        position vector is type [x, z, y]
+        '''
+
+        # trig adjacents
+        distance_x_0 = self.bound - self.position[0]
+        distance_x_1 = (2 * self.bound) - distance_x_0
+        distance_z_0 = self.bound - self.position[1]
+        distance_z_1 = (2 * self.bound) - distance_z_0
+
+        # assuming no yaw:
+        # sonar front
+        sonar_0 = distance_z_0 / math.cos(self.yaw_angle)
+        sonar_1 = distance_z_1 / math.cos(self.yaw_angle)
+        sonar_2 = distance_x_0 / math.cos(self.yaw_angle + 90)
+        sonar_3 = distance_x_1 / math.cos(self.yaw_angle + 90)
+        
+        # reassign for yaw
+        # return sonar shape = [front, back, left, right, top, bottom]
+        sonar = None
+
+        if self.yaw_angle > 315 or self.yaw_angle <= 45:
+            sonar = [sonar_0, sonar_1, sonar_2, sonar_3, sonar_top, sonar_bottom]
+        elif self.yaw_angle <= 135:
+            sonar = [sonar_2, sonar_3, sonar_1, sonar_0, sonar_top, sonar_bottom]
+        elif self.yaw_angle <= 225:
+            sonar = [sonar_1, sonar_0, sonar_3, sonar_2, sonar_top, sonar_bottom]
+        elif self.yaw_angle <= 315:
+            sonar = [sonar_3, sonar_2, sonar_0, sonar_1, sonar_top, sonar_bottom]
+        # observation is 6 sonar inputs for each 'face' of the agent drone
+        observation = sonar
+
+        # find resultant distance vector from center
+        x_dist = abs(self.position[0])
+        z_dist = abs(self.position[1])
+        y_dist = abs(self.position[2])
+        xz_dist = math.sqrt(math.pow(x_dist, 2) + math.pow(z_dist, 2))
+        xyz_dist = math.sqrt(math.pow(xz_dist, 2), math.pow(y_dist, 2))
+        max_reward = 10
+        # corner of cube = max travel distance before episode reset
+        max_travel_distance = math.sqrt(2 * math.pow(self.bound, 2))
+        reward_multiplier = Math.pow((1 - xyz_dist / max_travel_distance), 2)
+        # reward is maximized as the agent approaches the center of the map
+        reward = reward_multiplier * max_reward
+
+        # done if agent exceeds boundary on any plane
+        done = True if not (x_dist > self.bound or y_dist > self.bound or z_dist > self.bound) else False
+
+        return [observation, reward, done]
+        
 
     def step(self, action):
         # Action => Motor set invoked to high speed => (Hover, Roll, Pitch, Yaw) => Shape = 4
@@ -60,6 +124,7 @@ class SonarWithAcceleromenterBarometer:
 
         # alter yaw angle
         self.yaw_angle += delta_yaw
+        self.yaw_angle = self.yaw_angle % 360
 
         # alter velocity vector
         self.velocity[0] += math.cos(self.dtr(self.yaw_angle)) * delta_roll + math.cos(self.dtr(self.yaw_angle + 90)) * delta_pitch 
@@ -80,4 +145,3 @@ class SonarWithAcceleromenterBarometer:
 
     def dtr(deg):
         return deg * (math.pi / 180)
-    
