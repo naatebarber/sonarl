@@ -48,7 +48,7 @@ class Runner:
         if random.random() < self._eps:
             return self._env.sample_random_action()
         else:
-            return self._model.predict_one(np.array(tuple(state)), self._sess).reshape([4])
+            return self._model.predict_one(np.array(tuple(state)), self._sess).reshape([self._model._num_actions])
 
     def replay(self):
         batch = self._memory.sample(self._model._batch_size)

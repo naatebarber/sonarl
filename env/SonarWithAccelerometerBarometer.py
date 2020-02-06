@@ -4,15 +4,23 @@ import numpy as np
 
 # ENV assumes automatic correction for rotational and y-plane acceleration via barometer and accelerometer sensors.
 
-class SonarWithAcceleromenterBarometer:
+class SonarWithAccelerometerBarometer:
     def __init__(self):
         self.bound = 1000
+        self.padding = 200
         self.velocity = np.zeros([3])
-        self.position = np.random.randint(-self.bound, self.bound, [3])
+        self.position = np.random.randint(-(self.bound - self.padding), self.bound - self.padding, [3])
         self.yaw_angle = 0
+        # env info
+        self.num_actions = 9
+        self.num_states = 6
 
     def set_init_bound(self, bound):
         self.bound = bound
+        return self
+
+    def set_init_padding(self, padding):
+        self.padding = padding
         return self
 
     def set_init_velocity(self, velocity):
@@ -25,7 +33,7 @@ class SonarWithAcceleromenterBarometer:
 
     def ordi(self):
         # calculate sonar top/bottom (independent of yaw)
-        sonar_top = self.bound - self.position[3]
+        sonar_top = self.bound - self.position[2]
         sonar_bottom = self.bound * 2 - sonar_top
 
         '''
@@ -44,17 +52,17 @@ class SonarWithAcceleromenterBarometer:
         '''
 
         # trig adjacents
-        distance_x_0 = self.bound - self.position[0]
-        distance_x_1 = (2 * self.bound) - distance_x_0
-        distance_z_0 = self.bound - self.position[1]
-        distance_z_1 = (2 * self.bound) - distance_z_0
+        distance_x_0 = abs(self.bound - self.position[0])
+        distance_x_1 = abs((2 * self.bound) - distance_x_0)
+        distance_z_0 = abs(self.bound - self.position[1])
+        distance_z_1 = abs((2 * self.bound) - distance_z_0)
 
         # assuming no yaw:
         # sonar front
-        sonar_0 = distance_z_0 / math.cos(self.yaw_angle)
-        sonar_1 = distance_z_1 / math.cos(self.yaw_angle)
-        sonar_2 = distance_x_0 / math.cos(self.yaw_angle + 90)
-        sonar_3 = distance_x_1 / math.cos(self.yaw_angle + 90)
+        sonar_0 = distance_z_0 / abs(math.cos(self.yaw_angle))
+        sonar_1 = distance_z_1 / abs(math.cos(self.yaw_angle))
+        sonar_2 = distance_x_0 / abs(math.cos(self.yaw_angle + 90))
+        sonar_3 = distance_x_1 / abs(math.cos(self.yaw_angle + 90))
         
         # reassign for yaw
         # return sonar shape = [front, back, left, right, top, bottom]
@@ -76,18 +84,19 @@ class SonarWithAcceleromenterBarometer:
         z_dist = abs(self.position[1])
         y_dist = abs(self.position[2])
         xz_dist = math.sqrt(math.pow(x_dist, 2) + math.pow(z_dist, 2))
-        xyz_dist = math.sqrt(math.pow(xz_dist, 2), math.pow(y_dist, 2))
+        xyz_dist = math.sqrt(math.pow(xz_dist, 2) + math.pow(y_dist, 2))
         max_reward = 10
         # corner of cube = max travel distance before episode reset
         max_travel_distance = math.sqrt(2 * math.pow(self.bound, 2))
-        reward_multiplier = Math.pow((1 - xyz_dist / max_travel_distance), 2)
+        reward_multiplier = math.pow((1 - xyz_dist / max_travel_distance), 2)
         # reward is maximized as the agent approaches the center of the map
         reward = reward_multiplier * max_reward
 
         # done if agent exceeds boundary on any plane
-        done = True if not (x_dist > self.bound or y_dist > self.bound or z_dist > self.bound) else False
+        print(self.position, self.velocity)
+        done = True if (x_dist > self.bound or y_dist > self.bound or z_dist > self.bound) else False
 
-        return [observation, reward, done]
+        return [[float(o) for o in observation], float(reward), done]
         
 
     def step(self, action):
@@ -126,10 +135,16 @@ class SonarWithAcceleromenterBarometer:
         self.yaw_angle += delta_yaw
         self.yaw_angle = self.yaw_angle % 360
 
+        print("YAW: {}".format(self.yaw_angle))
+
         # alter velocity vector
-        self.velocity[0] += math.cos(self.dtr(self.yaw_angle)) * delta_roll + math.cos(self.dtr(self.yaw_angle + 90)) * delta_pitch 
-        self.velocity[1] += math.cos(self.dtr(self.yaw_angle + 90)) * delta_pitch + math.cos(self.dtr(self.yaw_angle)) * delta_roll
-        self.velocity[2] += delta_hover
+        delta_vx = math.cos(self.dtr(self.yaw_angle)) * delta_roll + math.cos(self.dtr(self.yaw_angle + 90)) * delta_pitch
+        delta_vz = math.cos(self.dtr(self.yaw_angle)) * delta_pitch + math.cos(self.dtr(self.yaw_angle + 90)) * delta_roll
+        delta_vy = delta_hover
+
+        self.velocity[0] += math.floor(delta_vx * 100) / 100
+        self.velocity[1] += math.floor(delta_vz * 100) / 100
+        self.velocity[2] += math.floor(delta_vy * 100) / 100
 
         # update position vector
         for i in range(len(self.velocity)): self.position[i] += self.velocity[i]
@@ -143,5 +158,8 @@ class SonarWithAcceleromenterBarometer:
         self.yaw_angle = 0
         return self.ordi()
 
-    def dtr(deg):
+    def sample_random_action(self):
+        return int(np.random.randint(0, self.num_actions))
+
+    def dtr(self, deg):
         return deg * (math.pi / 180)

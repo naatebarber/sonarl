@@ -1,6 +1,4 @@
-const net = require("net"),
-    envlib = require("./env"),
-    commandMap = envlib.envCommandMap;
+const net = require("net");
 
 const initializeSocketServer = conf => {
     const sockServer = net.createServer();
@@ -8,20 +6,13 @@ const initializeSocketServer = conf => {
         .on("connection", sock => {
             sock.on("data", data => {
                 try {
-                    var { env, ws } = conf;
+                    var { ws } = conf;
 
-                    const { env_action, params } = JSON.parse(data.toString("utf-8"));
-                    const ordi = commandMap(env)(env_action, params);
-
-                    sock.write(Buffer.from(JSON.stringify({
-                        env_action: env_action,
-                        success: Array.isArray(ordi),
-                        ordi: ordi
-                    })));
+                    const { env_action, data } = JSON.parse(data.toString("utf-8")),
+                        ordi = data.ordi;
 
                     if(ws && env_action == "step") ws.send(JSON.stringify({
                         graph: {
-                            position: env.position,
                             reward: [ordi[1]]
                         }
                     }))
