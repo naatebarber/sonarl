@@ -14,6 +14,8 @@ class SonarWithAccelerometerBarometer:
         # env info
         self.num_actions = 9
         self.num_states = 6
+        # reward generation
+        self.position_vec_prev = self.dist_from_center()
 
     def set_init_bound(self, bound):
         self.bound = bound
@@ -80,27 +82,33 @@ class SonarWithAccelerometerBarometer:
         observation = sonar
 
         # find resultant distance vector from center
+        # reward is maximized as the agent approaches the center of the map
+        position_vec = self.dist_from_center()
+        reward = 0
+        if position_vec > self.position_vec_prev:
+            reward = -10
+        else:
+            reward = 10
+        
+        # corner of cube = max travel distance before episode reset UNUSED FOR NOW
+        max_travel_distance = math.sqrt(2 * math.pow(self.bound, 2))
+
+        reward += 10*(position_vec / max_travel_distance)
+
+        # done if agent exceeds boundary on any plane
         x_dist = abs(self.position[0])
         z_dist = abs(self.position[1])
         y_dist = abs(self.position[2])
-        xz_dist = math.sqrt(math.pow(x_dist, 2) + math.pow(z_dist, 2))
-        xyz_dist = math.sqrt(math.pow(xz_dist, 2) + math.pow(y_dist, 2))
-        max_reward = 10
-        # corner of cube = max travel distance before episode reset
-        max_travel_distance = math.sqrt(2 * math.pow(self.bound, 2))
-        reward_multiplier = math.pow((1 - xyz_dist / max_travel_distance), 2)
-        # reward is maximized as the agent approaches the center of the map
-        reward = reward_multiplier * max_reward
-
-        # done if agent exceeds boundary on any plane
-        print(self.position, self.velocity)
         done = True if (x_dist > self.bound or y_dist > self.bound or z_dist > self.bound) else False
 
         return [[float(o) for o in observation], float(reward), done]
         
 
     def step(self, action):
-        # Action => Motor set invoked to high speed => (Hover, Roll, Pitch, Yaw) => Shape = 4
+        # Action => Motor set invoked to high speed => (HoverP, HoverN, RollP, RollN, PitchP, PitchN, YawP, YawN, None) => Shape = 9
+
+        self.position_vec_prev = self.dist_from_center()
+
         delta_hover = 0
         delta_roll = 0
         delta_pitch = 0
@@ -135,8 +143,6 @@ class SonarWithAccelerometerBarometer:
         self.yaw_angle += delta_yaw
         self.yaw_angle = self.yaw_angle % 360
 
-        print("YAW: {}".format(self.yaw_angle))
-
         # alter velocity vector
         delta_vx = math.cos(self.dtr(self.yaw_angle)) * delta_roll + math.cos(self.dtr(self.yaw_angle - 90)) * delta_pitch
         delta_vz = math.cos(self.dtr(self.yaw_angle)) * delta_pitch + math.cos(self.dtr(self.yaw_angle - 90)) * delta_roll
@@ -149,6 +155,8 @@ class SonarWithAccelerometerBarometer:
         # update position vector
         for i in range(len(self.velocity)): self.position[i] += self.velocity[i]
 
+        # print("Velocity ", self.velocity)
+
         # return ordi
         return self.ordi()
 
@@ -159,7 +167,18 @@ class SonarWithAccelerometerBarometer:
         return self.ordi()
 
     def sample_random_action(self):
-        return int(np.random.randint(0, self.num_actions))
+        index = int(np.random.randint(0, self.num_actions))
+        actions = np.zeros(self.num_actions)
+        actions[index] = 1
+        return actions
 
     def dtr(self, deg):
         return deg * (math.pi / 180)
+
+    def dist_from_center(self):
+        x_dist = abs(self.position[0])
+        z_dist = abs(self.position[1])
+        y_dist = abs(self.position[2])
+        xz_dist = math.sqrt(math.pow(x_dist, 2) + math.pow(z_dist, 2))
+        xyz_dist = math.sqrt(math.pow(xz_dist, 2) + math.pow(y_dist, 2))
+        return xyz_dist

@@ -9,7 +9,6 @@ class EnvSocketWrapper:
 
     def step(self, action):
         ordi = self.env.step(action)
-        print(ordi)
         self.socket.send(bytes(json.dumps({
             "env_action": "step",
             "data": ordi

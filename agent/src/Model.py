@@ -21,9 +21,10 @@ class Model:
         self._states = tf.placeholder(tf.float32, shape=[None, self._num_states], name="States")
         self._q_s_a = tf.placeholder(tf.float32, shape=[None, self._num_actions], name="Actions")
         # define hidden layers
-        hl1 = tf.layers.dense(self._states, 50, tf.nn.relu)
-        hl2 = tf.layers.dense(hl1, 50, tf.nn.relu)
-        self._logits = tf.nn.softmax(tf.layers.dense(hl2, self._num_actions, name="Prediction"))
+        hl1 = tf.layers.dense(self._states, 124, tf.nn.relu)
+        hl2 = tf.layers.dense(hl1, 124, tf.nn.relu)
+        hl3 = tf.layers.dense(hl2, 124, tf.nn.relu)
+        self._logits = tf.nn.softmax(tf.layers.dense(hl3, self._num_actions, name="Prediction"))
         # define loss and optimizer
         loss = tf.losses.mean_squared_error(self._q_s_a, self._logits)
         self._optimizer = tf.train.AdamOptimizer().minimize(loss)

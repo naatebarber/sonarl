@@ -6,13 +6,13 @@ import os
 import json
 import tensorflow as tf
 import numpy as np
+from matplotlib import pyplot as plt
 
 if __name__ == "__main__":
     env_worker = SonarWithAccelerometerBarometer()
     env_address = ("localhost", int(os.getenv("SOCKET_SERVER_PORT")))
     env = EnvSocketWrapper(env_address, env_worker)
     reset_ordi = env.reset()
-    print(reset_ordi)
 
     num_states = 6
     num_actions = 4
@@ -22,12 +22,15 @@ if __name__ == "__main__":
     max_memory = 10000
     memory = src.Memory(max_memory)
 
-    num_episodes = 100
+    num_episodes = 1000
 
     with tf.Session() as sess:
         sess.run(model._var_init)
-        runner = src.Runner(sess, env, model, memory, 0.8, 1e-5, .94)
+        runner = src.Runner(sess, env, model, memory, 0.8, 1e-5, .97, 0)
         for i in range(num_episodes):
-            print("Episode {}".format(i))
             runner.run()
-        env.reset()
+            if i % 10 == 0:
+                print("EPISODE {}".format(i))
+        # plot reward growth
+        plt.plot(runner._reward_store)
+        plt.show()

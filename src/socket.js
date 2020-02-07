@@ -4,16 +4,16 @@ const initializeSocketServer = conf => {
     const sockServer = net.createServer();
     sockServer
         .on("connection", sock => {
-            sock.on("data", data => {
+            sock.on("data", packet => {
                 try {
                     var { ws } = conf;
 
-                    const { env_action, data } = JSON.parse(data.toString("utf-8")),
-                        ordi = data.ordi;
+                    const { env_action, data } = JSON.parse(packet.toString("utf-8"));
+                    console.log(env_action, data);
 
                     if(ws && env_action == "step") ws.send(JSON.stringify({
                         graph: {
-                            reward: [ordi[1]]
+                            reward: [data.ordi[1]]
                         }
                     }))
                 } catch(err) {
