@@ -2,24 +2,28 @@
 Temporal difference learning with Deep Q Network, utilizing experience replay
 
 ### index.js  
-Websocket server for connecting agent updates to web interface and connective mesh.  
+Websocket server for connecting agent updates to web reporting interface.  
 
 ### src/socket.js  
 Env-agent communication handler. Updates websockets with recent data and activates env methods.
 
-### src/env.js  
-Contains an object containing different environment classes and methods.
+### env/*  
+Python env. Currently only contains SonarWithAccelerometerAndBarometer which assumes automatic adjustment to gravity and tilt.  
+Also includes EnvSocketWrapper, which adds a socket relay to env method calls.
 
 ### client/*  
-Client code for displaying environment and success of DQN
+Client code for displaying environment and success of DQN.
 
-### agent/*.py
-Python package for handling socket connections, translating values to agent-readable format, and running DQN on observations.
+### agent/src  
+Components of agent (Runner, Model, and Memory for experience replay)  
+
+### agent/main.py  
+Callable module to initiate agent action
 
 ## Current ENV Observation/Actions/Reward/Done   
 O: 6 'sonar' values, `((1, front), (2, left), (3, right), (4, back), (5, top), (6, bottom))`  
-A: Array of four floats, each representing change in TPRY `((1, throttle), (2, pitch), (3, roll), (4, yaw))`  
-R: `Math.pow(1 - (((this.map_size / 2) % i) || 0.01) / (this.map_size / 2), 2)` - mean of dimensional vectors   
+A: One-hot shape (9) Array `throttle_up, throttle_down, roll_pos, roll_neg, pitch_pos, pitch_neg, yaw_pos, yaw_neg, no_action`    
+R: `-10 if new position is farther than old position, +10 vice versa` 
 D: Agent exceeds max_distance_from_center  
 
 ## Running the simulation  
