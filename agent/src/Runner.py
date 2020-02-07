@@ -17,7 +17,7 @@ class Runner:
         self._steps = 0
 
     def run(self):
-        state = self._env.reset()
+        state, _, _ = self._env.reset()
         tot_reward = 0
 
         while True:
@@ -48,6 +48,7 @@ class Runner:
         if random.random() < self._eps:
             return self._env.sample_random_action()
         else:
+            print("State: {}".format(state))
             return self._model.predict_one(np.array(tuple(state)), self._sess).reshape([self._model._num_actions])
 
     def replay(self):

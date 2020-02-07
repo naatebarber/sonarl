@@ -122,7 +122,7 @@ class SonarWithAccelerometerBarometer:
             # PITCH: Alter Z-plane vector POS
             delta_pitch = 5
         elif action is 5:
-            # PITCH: Alter Y-plane vector NEG
+            # PITCH: Alter X-plane vector NEG
             delta_pitch = -5
         elif action is 6:
             # YAW: Alter Yaw-angle to shift future acceleration POS
@@ -138,8 +138,8 @@ class SonarWithAccelerometerBarometer:
         print("YAW: {}".format(self.yaw_angle))
 
         # alter velocity vector
-        delta_vx = math.cos(self.dtr(self.yaw_angle)) * delta_roll + math.cos(self.dtr(self.yaw_angle + 90)) * delta_pitch
-        delta_vz = math.cos(self.dtr(self.yaw_angle)) * delta_pitch + math.cos(self.dtr(self.yaw_angle + 90)) * delta_roll
+        delta_vx = math.cos(self.dtr(self.yaw_angle)) * delta_roll + math.cos(self.dtr(self.yaw_angle - 90)) * delta_pitch
+        delta_vz = math.cos(self.dtr(self.yaw_angle)) * delta_pitch + math.cos(self.dtr(self.yaw_angle - 90)) * delta_roll
         delta_vy = delta_hover
 
         self.velocity[0] += math.floor(delta_vx * 100) / 100
