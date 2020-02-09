@@ -1,4 +1,3 @@
-import socket_handle
 from env import SonarWithAccelerometerBarometer
 from env import EnvSocketWrapper
 import src
