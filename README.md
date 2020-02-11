@@ -5,20 +5,20 @@ Temporal difference learning with Deep Q Network, utilizing experience replay
 Websocket server for connecting agent updates to web reporting interface.  
 
 ### src/socket.js  
-Env-agent communication handler. Updates websockets with recent data and activates env methods.
+Env-agent communication handler. Updates websockets with recent data.
 
 ### env/*  
 Python env. Currently only contains SonarWithAccelerometerAndBarometer which assumes automatic adjustment to gravity and tilt.  
 Also includes EnvSocketWrapper, which adds a socket relay to env method calls.
 
 ### client/*  
-Client code for displaying environment and success of DQN.
+Client code for displaying environment and success of DQN/GenAlg.
 
-### agent/src  
-Components of agent (Runner, Model, and Memory for experience replay)  
+### agent/deep_q   
+Deep Q Network with experience replay  
 
-### agent/main.py  
-Callable module to initiate agent action
+### agent/genetic   
+Genetic algorithm mutated by gaussian noise. Crossover mutations (WIP)  
 
 ## Current ENV Observation/Actions/Reward/Done   
 O: 6 'sonar' values, `((1, front), (2, left), (3, right), (4, back), (5, top), (6, bottom))`  
