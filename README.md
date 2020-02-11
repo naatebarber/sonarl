@@ -29,4 +29,4 @@ D: Agent exceeds max_distance_from_center
 ## Running the simulation  
 Run the simulation using the start script `./start.sh`  
 This will install all node/python packages and start the node socket/env server inside a screen daemon.
-Following this, run `agent/main.py` to experiment with the RL.
+Following this, run `agent/{genetic || deep_q}/main.py` to experiment with the RL.
