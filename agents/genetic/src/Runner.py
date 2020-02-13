@@ -42,7 +42,7 @@ class Runner:
                         self.last_gen_fittest[i].mutate())
         # run generation
         # (TODO) create env capable of hosting multple agents
-
+        
 
         # record total score
         self.total_fitness_store.append(np.sum(self.gen_fitness))

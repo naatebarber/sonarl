@@ -13,6 +13,7 @@ class SonarWithAccelerometerBarometer:
         self.yaw_angle = 0
         # env info
         self.num_actions = 9
+
         self.num_states = 6
         # reward generation
         self.position_vec_prev = self.dist_from_center()
@@ -27,6 +28,10 @@ class SonarWithAccelerometerBarometer:
 
     def set_init_velocity(self, velocity):
         self.velocity = velocity
+        return self
+
+    def set_init_position(self, position):
+        self.position = position
         return self
 
     def set_init_nonzero_yaw(self):
@@ -84,6 +89,7 @@ class SonarWithAccelerometerBarometer:
         # find resultant distance vector from center
         # reward is maximized as the agent approaches the center of the map
         position_vec = self.dist_from_center()
+        print(position_vec)
         reward = 0
         if position_vec > self.position_vec_prev:
             reward = -10
@@ -97,8 +103,8 @@ class SonarWithAccelerometerBarometer:
 
         # done if agent exceeds boundary on any plane
         x_dist = abs(self.position[0])
-        z_dist = abs(self.position[1])
-        y_dist = abs(self.position[2])
+        y_dist = abs(self.position[1])
+        z_dist = abs(self.position[2])
         done = True if (x_dist > self.bound or y_dist > self.bound or z_dist > self.bound) else False
 
         return [[float(o) for o in observation], float(reward), done]
@@ -149,8 +155,8 @@ class SonarWithAccelerometerBarometer:
         delta_vy = delta_hover
 
         self.velocity[0] += math.floor(delta_vx * 100) / 100
-        self.velocity[1] += math.floor(delta_vz * 100) / 100
-        self.velocity[2] += math.floor(delta_vy * 100) / 100
+        self.velocity[1] += math.floor(delta_vy * 100) / 100
+        self.velocity[2] += math.floor(delta_vz * 100) / 100
 
         # update position vector
         for i in range(len(self.velocity)): self.position[i] += self.velocity[i]
@@ -177,8 +183,8 @@ class SonarWithAccelerometerBarometer:
 
     def dist_from_center(self):
         x_dist = abs(self.position[0])
-        z_dist = abs(self.position[1])
-        y_dist = abs(self.position[2])
+        y_dist = abs(self.position[1])
+        z_dist = abs(self.position[2])
         xz_dist = math.sqrt(math.pow(x_dist, 2) + math.pow(z_dist, 2))
         xyz_dist = math.sqrt(math.pow(xz_dist, 2) + math.pow(y_dist, 2))
         return xyz_dist
