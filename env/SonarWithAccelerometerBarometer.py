@@ -40,7 +40,7 @@ class SonarWithAccelerometerBarometer:
 
     def ordi(self):
         # calculate sonar top/bottom (independent of yaw)
-        sonar_top = self.bound - self.position[2]
+        sonar_top = self.bound - self.position[1]
         sonar_bottom = self.bound * 2 - sonar_top
 
         '''
@@ -61,7 +61,7 @@ class SonarWithAccelerometerBarometer:
         # trig adjacents
         distance_x_0 = abs(self.bound - self.position[0])
         distance_x_1 = abs((2 * self.bound) - distance_x_0)
-        distance_z_0 = abs(self.bound - self.position[1])
+        distance_z_0 = abs(self.bound - self.position[2])
         distance_z_1 = abs((2 * self.bound) - distance_z_0)
 
         # assuming no yaw:
@@ -89,7 +89,6 @@ class SonarWithAccelerometerBarometer:
         # find resultant distance vector from center
         # reward is maximized as the agent approaches the center of the map
         position_vec = self.dist_from_center()
-        print(position_vec)
         reward = 0
         if position_vec > self.position_vec_prev:
             reward = -10
@@ -99,7 +98,7 @@ class SonarWithAccelerometerBarometer:
         # corner of cube = max travel distance before episode reset UNUSED FOR NOW
         max_travel_distance = math.sqrt(2 * math.pow(self.bound, 2))
 
-        reward += 10*(position_vec / max_travel_distance)
+        # reward += 10*(abs(position_vec) / max_travel_distance)
 
         # done if agent exceeds boundary on any plane
         x_dist = abs(self.position[0])
@@ -151,17 +150,18 @@ class SonarWithAccelerometerBarometer:
 
         # alter velocity vector
         delta_vx = math.cos(self.dtr(self.yaw_angle)) * delta_roll + math.cos(self.dtr(self.yaw_angle - 90)) * delta_pitch
-        delta_vz = math.cos(self.dtr(self.yaw_angle)) * delta_pitch + math.cos(self.dtr(self.yaw_angle - 90)) * delta_roll
         delta_vy = delta_hover
+        delta_vz = math.cos(self.dtr(self.yaw_angle)) * delta_pitch + math.cos(self.dtr(self.yaw_angle - 90)) * delta_roll
 
         self.velocity[0] += math.floor(delta_vx * 100) / 100
         self.velocity[1] += math.floor(delta_vy * 100) / 100
         self.velocity[2] += math.floor(delta_vz * 100) / 100
 
+        print(self.velocity)
+        print(self.position)
+
         # update position vector
         for i in range(len(self.velocity)): self.position[i] += self.velocity[i]
-
-        # print("Velocity ", self.velocity)
 
         # return ordi
         return self.ordi()

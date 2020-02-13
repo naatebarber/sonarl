@@ -27,6 +27,7 @@ class Runner:
             time.sleep(self._timestep)
             action = self.choose_action(state)
             action_int = int(np.argmax(action))
+            print(action_int)
             next_state, reward, done = self._env.step(action_int)
 
             # reward modifier?
@@ -50,9 +51,13 @@ class Runner:
 
     def choose_action(self, state):
         if random.random() < self._eps:
-            return self._env.sample_random_action()
+            action = self._env.sample_random_action()
+            print("Random Action: ")
+            return action
         else:
-            return self._model.predict_one(np.array(tuple(state)), self._sess).reshape([self._model._num_actions])
+            action = self._model.predict_one(np.array(tuple(state)), self._sess).reshape([self._model._num_actions])
+            print("Model Based Action: ")
+            return action
 
     def replay(self):
         GAMMA = 0.95

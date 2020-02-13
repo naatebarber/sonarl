@@ -9,27 +9,36 @@ const createLineGraph = (w, h, margin, name) => {
     svg.transition().style("background-color", "#efefef").attr("width", `${w + margin * 2}px`).attr("height", `${h + margin * 2}px`)
     svg = svg.append("g").attr("transform", `translate(${margin}, ${margin})`)
 
+    svg.append("text")
+        .attr("x", 0)
+        .attr("y", 0)
+        .style("font-size", "22px")
+        .style("margin-bottom", "22px")
+
     svg.append("g")
         .attr("class", "x axis")
-        .attr("transform", `translate(0, ${h})`)
+        .attr("transform", `translate(0, ${h + 20})`)
 
     svg.append("g")
         .attr("class", "y axis")
-        .attr("transform", `translate(0, 0)`)
+        .attr("transform", `translate(0, 20)`)
 
     svg.append("path")
         .attr("class", "line l0")
+        .attr("transform", `translate(0, 20)`)
 
     svg.append("path")
         .attr("class", "line l1")
+        .attr("transform", `translate(0, 20)`)
     
     svg.append("path")
         .attr("class", "line l2")
+        .attr("transform", `translate(0, 20)`)
 
     return svg;
 }
 
-const updateGraph = svg => data => {
+const updateGraph = svg => data => title => {
     // Where data is a 2d array [[][][][]]
     
     let max = Math.max(...data.flat())
@@ -49,6 +58,9 @@ const updateGraph = svg => data => {
     let xscale = d3.scaleLinear().domain([0, data[0].length - 1]).range([0, w])
     let yscale = d3.scaleLinear().domain([min, max]).range([h, 0])
     let line = d3.line().x((d, i) => xscale(i)).y(d => yscale(d)).curve(d3.curveMonotoneX)
+
+    svg.selectAll("text")
+        .text(title)
 
     svg.selectAll("g.x.axis")
         .call(d3.axisBottom(xscale))
@@ -76,7 +88,7 @@ const recvNewDataPoint = store => (svg, params) => ev => {
         });
         for(let i in store) {
             if(!(svg.hasOwnProperty(i))) svg[i] = createLineGraph(params.w, params.h, params.m, i);
-            updateGraph(svg[i])(store[i])
+            updateGraph(svg[i])(store[i])(i)
         }
     } catch(e) {
         console.log(e)

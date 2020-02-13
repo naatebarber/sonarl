@@ -55,7 +55,7 @@ const step = (scene) => {
         }
         window.nodes[i].position.x = window.vectors[i][0] / 10
         window.nodes[i].position.y = window.vectors[i][1] / 10
-        window.nodes[i].position.z = window.vectors[i][1] / 10
+        window.nodes[i].position.z = window.vectors[i][2] / 10
     }
 
 }
