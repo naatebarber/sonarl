@@ -21,7 +21,7 @@ if __name__ == "__main__":
     max_memory = 10000
     memory = src.Memory(max_memory)
 
-    num_episodes = 1000
+    num_episodes = 100
 
     with tf.Session() as sess:
         sess.run(model._var_init)
@@ -30,6 +30,6 @@ if __name__ == "__main__":
             runner.run()
             if i % 10 == 0:
                 print("EPISODE {}".format(i))
-        # plot reward growth
-        plt.plot(runner._reward_store)
-        plt.show()
+        # # plot reward growth
+        # plt.plot(runner._reward_store)
+        # plt.show()

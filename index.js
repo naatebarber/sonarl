@@ -6,16 +6,21 @@ const express = require("express"),
     expressws = require("express-ws")(app),
     bodyparser = require("body-parser"),
     socketServerConf = {
-        ws: undefined
+        graphWs: undefined,
+        threeWs: undefined
     }
     socketServer = initSocket(socketServerConf);
 
 app.use(express.static(__dirname + "/ui"))
     .use(bodyparser.json())
     .use(bodyparser.urlencoded({extended: false}))
-    .ws("/gui", (ws, req) => {
-        socketServerConf.ws = ws;
-        console.log("Connection made");
+    .ws("/graph", (ws, req) => {
+        socketServerConf.graphWs = ws;
+        console.log("Graph connection made");
+    })
+    .ws("/simulate", (ws, req) => {
+        socketServerConf.threeWs = ws;
+        console.log("Simulation connection made");
     })
     .post("/run-agent", (req, res) => {
         let agentSession = spawn("python", [__dirname + "/agent/main.py"]),

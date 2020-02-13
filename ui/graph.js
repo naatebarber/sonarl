@@ -1,16 +1,3 @@
-$(document).ready(() => {
-    var ws = new WebSocket("ws://localhost:8080/gui", "protocolOne"),
-        store = {},
-        svgParams = {
-            w: (window.innerWidth / 1.5) < 600 ? (window.innerWidth / 1.5) : 600,
-            h: (window.innerWidth / 1.5) < 600 ? (window.innerWidth / 1.5) : 600,
-            m: 40
-        },
-        svg = {};
-        
-    ws.onmessage = recvNewDataPoint(store)(svg, svgParams)
-});
-
 const createLineGraph = (w, h, margin, name) => {
     // create d3 graph
     this.w = w;
@@ -43,19 +30,21 @@ const createLineGraph = (w, h, margin, name) => {
 }
 
 const updateGraph = svg => data => {
-
-    console.log(data)
     // Where data is a 2d array [[][][][]]
     
     let max = Math.max(...data.flat())
     let min = Math.min(...data.flat())
-    let reshaped = Array.apply(null, Array(3)).map(e => [])
-    for(let i = 0; i < reshaped.length; i++) {
-        for(let j = 0; j < data.length; j++) {
-            reshaped[i].push(data[j][i]);
+    if(Array.isArray(data[0])) {
+        let reshaped = Array.apply(null, Array(3)).map(e => [])
+        for(let i = 0; i < reshaped.length; i++) {
+            for(let j = 0; j < data.length; j++) {
+                reshaped[i].push(data[j][i]);
+            }
         }
+        data = reshaped;
+    } else {
+        data = [data]
     }
-    data = reshaped;
 
     let xscale = d3.scaleLinear().domain([0, data[0].length - 1]).range([0, w])
     let yscale = d3.scaleLinear().domain([min, max]).range([h, 0])
@@ -72,15 +61,13 @@ const updateGraph = svg => data => {
             .datum(data[i])
             .attr("d", line)
     }
-
-    console.log("Updated!")
 }
 
 const recvNewDataPoint = store => (svg, params) => ev => {
     try {
         let data = JSON.parse(ev.data);
         Object.keys(data.graph).map(el => {
-            if(store.hasOwnProperty(el)) {
+            if(store.hasOwnProperty(el) && typeof data.graph[el] == "number") {
                 store[el].push(data.graph[el])
             } else {
                 store[el] = [];
@@ -95,6 +82,5 @@ const recvNewDataPoint = store => (svg, params) => ev => {
         console.log(e)
         console.log(ev.data)
     }
-    console.log(store);
     return store;
 }

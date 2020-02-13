@@ -4,15 +4,24 @@
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
-        <div class="title">sonarl display</div>
-        <div class="run-agent"><span>Run Agent</span></div>
-        <div class="vis">
-            
+        <div class="title">sonarl gui</div>
+
+        <div class="three-handle">
+            <!-- three renderer is injected here -->
         </div>
+        
+        <!-- <div class="run-agent"><span>Run Agent</span></div> -->
+        <div class="vis">
+            <!-- d3js graph -->
+        </div>
+
         <div class="run-agent-log"></div>
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         <script src="https://d3js.org/d3.v5.min.js"></script>
+        <script src="src/three.min.js"></script>
+        <script src="src/OrbitControls.js"></script>
+        <script src="simulation.js"></script>
         <script src="script.js"></script>
-        <script src="visualizer.js"></script>
+        <script src="graph.js"></script>
     </body>
 </html>

@@ -11,14 +11,15 @@ class EnvSocketWrapper:
         ordi = self.env.step(action)
         self.socket.send(bytes(json.dumps({
             "env_action": "step",
-            "data": ordi
+            "data": ordi,
+            "position": [ float(i) for i in self.env.position ]
         }), "utf-8"))
         return ordi
 
     def reset(self):
         ordi = self.env.reset()
         self.socket.send(bytes(json.dumps({
-            "env_step": "reset",
+            "env_action": "reset",
             "data": ordi
         }), "utf-8"))
         return ordi
