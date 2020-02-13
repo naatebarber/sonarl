@@ -7,8 +7,8 @@ import numpy as np
 class SonarWithAccelerometerBarometer:
     def __init__(self):
         self.bound = 1000
-        self.padding = 200
-        self.velocity = np.zeros([3])
+        self.padding = 500
+        self.velocity = np.random.randint(-10, 10, [3])
         self.position = np.random.randint(-(self.bound - self.padding), self.bound - self.padding, [3])
         self.yaw_angle = 0
         # env info
@@ -162,7 +162,7 @@ class SonarWithAccelerometerBarometer:
 
     def reset(self):
         self.position = np.random.randint(-self.bound, self.bound, [3])
-        self.velocity = np.zeros([3])
+        self.velocity = np.random.randint(-10, 10, [3])
         self.yaw_angle = 0
         return self.ordi()
 

@@ -21,7 +21,13 @@ $(document).ready(() => {
 
     // THREE simulation
     var threeWs = new WebSocket("ws://localhost:8080/simulate", "protocolOne")
+    window.nodes = []
     threeWs.onmessage = (ev) => {
-        window.simulation = JSON.parse(ev.data).vector
+        let data = JSON.parse(ev.data),
+            done = data.done;
+        window.vectors = data.vector;
+        if(done) {
+            window.vectors = [];
+        }
     }
 });

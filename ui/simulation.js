@@ -46,15 +46,25 @@ const grid = (min, max, spacing) => {
     return lines
 }
 
-const step = () => {
+const step = (scene) => {
     // window.sphere.position.x += 1
+    for(let i in window.vectors) {
+        if(window.nodes[i] == undefined) {
+            window.nodes[i] = sphere()
+            scene.add(window.nodes[i])
+        }
+        window.nodes[i].position.x = window.vectors[i][0] / 10
+        window.nodes[i].position.y = window.vectors[i][1] / 10
+        window.nodes[i].position.z = window.vectors[i][1] / 10
+    }
+
 }
 
 const animate = (props) => () => {
     requestAnimationFrame( animate(props) )
     // render with three
     let { scene, camera, renderer } = props
-    step()
+    step(scene)
     renderer.render(scene, camera);
 }
 
@@ -67,6 +77,6 @@ $(document).ready(() => {
         scene.add(i)
     }
     window.sphere = sphere()
-    scene.add(window.sphere)
+    // scene.add(window.sphere)
     animate({ scene, camera, renderer })()
 })

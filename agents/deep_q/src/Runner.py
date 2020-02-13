@@ -43,7 +43,7 @@ class Runner:
             state = next_state
             tot_reward += reward
 
-            if done is True or self._steps > 3000:
+            if done is True or self._steps > 20000:
                 self._reward_store.append(tot_reward)
                 self._ending_vec_store.append(self._env.env.position_vec_prev)
                 break
