@@ -33,12 +33,13 @@ class Organism:
         if self.parent_biases is None and self.parent_weights is None:
             # init a random weight/bias for each hidden layer
             for i in range(self.num_hidden_layers):
-                if len(self.hidden_layers) is 0:
+                if i is 0:
                     self.hidden_layers.append(
                         tf.layers.dense(
                             self.states, 
                             self.num_hidden_units, 
                             tf.nn.relu,
+                            reuse=tf.AUTO_REUSE,
                             name="hidden{}".format(i)))
                 else:
                     self.hidden_layers.append(
@@ -46,20 +47,30 @@ class Organism:
                             self.hidden_layers[i - 1],
                             self.num_hidden_units,
                             tf.nn.relu,
+                            reuse=tf.AUTO_REUSE,
                             name="hidden{}".format(i)))
         else:
-            # utilize the mutate property to alter parent weight/bias for each hidden layer
+            # Apply mutated parent weights to new instance
             for i in range(self.num_hidden_layers):
-                if len(self.hidden_layers) is 0:
+                if i is 0:
                     self.hidden_layers.append(
-                        self.mutate_parent_layer(
-                            self.states,
-                            "hidden{}".format(i)))
+                        tf.layers.dense(
+                            self.states, 
+                            kernel_initializer=tf.get_variable("kernel"),
+                            bias_initializer=tf.get_variable("bias"),
+                            activation=tf.nn.relu,
+                            reuse=tf.AUTO_REUSE,
+                            name="hidden{}".format(i)))
                 else:
                     self.hidden_layers.append(
-                        self.mutate_parent_layer(
-                            self.hidden_layers[i - 1],
-                            "hidden{}".format(i)))
+                        tf.layers.dense(
+                            self.states, 
+                            kernel_initializer=tf.get_variable("kernel"),
+                            bias_initializer=tf.get_variable("bias"),
+                            activation=tf.nn.relu,
+                            reuse=tf.AUTO_REUSE,
+                            name="hidden{}".format(i)))
+
         # create output layer
         self.logits = tf.layers.dense(
             self.hidden_layers[self.num_hidden_layers - 1],

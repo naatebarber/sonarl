@@ -13,10 +13,11 @@ class SonarWithAccelerometerBarometer:
         self.yaw_angle = 0
         # env info
         self.num_actions = 9
-
         self.num_states = 6
         # reward generation
         self.position_vec_prev = self.dist_from_center()
+        # done
+        self.done = False
 
     def set_init_bound(self, bound):
         self.bound = bound
@@ -104,9 +105,9 @@ class SonarWithAccelerometerBarometer:
         x_dist = abs(self.position[0])
         y_dist = abs(self.position[1])
         z_dist = abs(self.position[2])
-        done = True if (x_dist > self.bound or y_dist > self.bound or z_dist > self.bound) else False
+        self.done = True if (x_dist > self.bound or y_dist > self.bound or z_dist > self.bound) else False
 
-        return [[float(o) for o in observation], float(reward), done]
+        return [[float(o) for o in observation], float(reward), self.done]
         
 
     def step(self, action):
@@ -188,3 +189,11 @@ class SonarWithAccelerometerBarometer:
         xz_dist = math.sqrt(math.pow(x_dist, 2) + math.pow(z_dist, 2))
         xyz_dist = math.sqrt(math.pow(xz_dist, 2) + math.pow(y_dist, 2))
         return xyz_dist
+
+    @staticmethod
+    def get_num_actions():
+        return SonarWithAccelerometerBarometer().num_actions
+
+    @staticmethod
+    def get_num_states():
+        return SonarWithAccelerometerBarometer().num_states
