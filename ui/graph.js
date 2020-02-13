@@ -83,8 +83,9 @@ const recvNewDataPoint = store => (svg, params) => ev => {
                 store[el].push(data.graph[el])
             } else {
                 store[el] = [];
-                store[el].push(data.graph[el])
+                store[el].push(data.graph[el]);
             }
+            while(store[el].length > 1000) store[el].shift();
         });
         for(let i in store) {
             if(!(svg.hasOwnProperty(i))) svg[i] = createLineGraph(params.w, params.h, params.m, i);
