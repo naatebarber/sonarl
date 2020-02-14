@@ -30,3 +30,5 @@ D: Agent exceeds max_distance_from_center
 Run the simulation using the start script `./start.sh`  
 This will install all node/python packages and start the node socket/env server inside a screen daemon.
 Following this, run `agent/{genetic || deep_q}/main.py` to experiment with the RL.
+
+View space simulation (THREE) and reward graphs (D3) at `localhost:8080`
