@@ -42,7 +42,6 @@ class Runner:
         # generate organisms
         if self.last_gen_fittest is None:
             for i in range(self.gen_size):
-                self.sess.run(tf.reset_default_graph())
                 self.gen.append(
                     self.organism(self.num_states, self.num_actions, self.layers, self.units, self.noise))
         else:

@@ -27,28 +27,54 @@ class Genetic:
         self.hidden = []
         if self.dense_layers is None:
             for i in range(self.num_hidden):
-                self.hidden.append(
-                    tf.layers.Dense(
-                        units=self.num_units,
-                        activation=tf.nn.relu))
+                if i is 0:
+                    self.hidden.append({
+                        "activation": tf.nn.relu,
+                        "weight": tf.Variable(
+                            initial_value=tf.random_normal([self.num_states, self.num_units]), 
+                            dtype=tf.float32),
+                        "bias": tf.Variable(
+                            initial_value=tf.random_normal([self.num_states, self.num_units]), 
+                            dtype=tf.float32)
+                    })
+                else:
+                    self.hidden.append({
+                        "activation": tf.nn.relu,
+                        "weight": tf.Variable(
+                            initial_value=tf.random_normal([self.num_units, self.num_units]), 
+                            dtype=tf.float32),
+                        "bias": tf.Variable(
+                            initial_value=tf.random_normal([self.num_units, self.num_units]), 
+                            dtype=tf.float32)
+                    })
         else:
             self.hidden = self.dense_layers
         # action layer outputs logits
-        self.action_layer = tf.layers.Dense(self.num_actions)
+        self.action_layer = {
+            "weight": tf.Variable(
+                initial_value=tf.random_normal([self.num_units, self.num_actions]), 
+                dtype=tf.float32),
+            "bias": tf.Variable(
+                initial_value=tf.random_normal([self.num_units, self.num_actions]), 
+                dtype=tf.float32)
+        }
 
         # matrix feed for logits
         for i in range(len(self.hidden)):
             if i is 0:
-                self.logits = self.hidden[i].apply(self.states)
+                self.logits = self.hidden[i].activation(tf.add(tf.matmul(self.states, self.hidden[i].weight), self.hidden[i].bias))
             else:
-                self.logits = self.hidden[i].apply(self.logits)
+                self.logits = self.hidden[i].activation(tf.add(tf.matmul(self.logits, self.hidden[i].weight), self.hidden[i].bias))
 
         # reshape to action
-        self.logits = self.action_layer.apply(self.logits)
+        self.logits = tf.add(tf.matmul(self.logits, self.action_layer.weight), self.action_layer.bias)
         self.var_init = tf.global_variables_initializer()
 
     def predict(self, sess, state):
         return sess.run(self.logits, {self.states: state})
 
     def mutate(self):
+        pass
+
+    def cross(self):
         pass
