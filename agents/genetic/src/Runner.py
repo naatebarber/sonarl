@@ -61,7 +61,7 @@ class Runner:
             for i in range(len(self.last_gen_fittest)):
                 for _ in range(10):
                     self.gen.append(
-                        self.last_gen_fittest[i].mutate())
+                        self.last_gen_fittest[i].mutate_with_noise())
         
         # populate fitness array
         self.gen_fitness = np.zeros([len(self.gen)])
@@ -74,6 +74,7 @@ class Runner:
                     time.sleep(self.timestep)
                 for i in range(len(self.gen_envs)):
                     if self.gen_ordi[i][2] is True:
+                        # print("Genetic {} is dead".format(i))
                         continue
 
                     observation, reward, done = self.gen_envs[i].step(
@@ -87,8 +88,12 @@ class Runner:
                     if done is True:
                         eliminated += 1
                         print("{} out of {} eliminated in generation {}".format(eliminated, len(self.gen), self.generation))
-                        if eliminated is self.gen_size: 
-                            break
+                if eliminated is self.gen_size: 
+                    self.gen_ordi = []
+                    for k in range(self.gen_size):
+                        reset_ordi = self.gen_envs[k].reset()
+                        self.gen_ordi.append(reset_ordi)
+                    break
 
                 self.sock.send_step({
                     "env_action": "step",
@@ -101,6 +106,6 @@ class Runner:
 
         # pull out top ten percent
         top = sorted([ (x, i) for (i, x) in enumerate(self.gen_fitness) ], reverse=True)
-        self.last_gen_fittest = [ gen[i[1]] for i in top ]
+        self.last_gen_fittest = [ self.gen[i[1]] for i in top ]
         print("Generation {} finished".format(self.generation))
         self.generation += 1

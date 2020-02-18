@@ -18,7 +18,7 @@ if __name__ == "__main__":
         init_layer_units=50, 
         gaussian_noise=0.1, 
         gen_size=100,
-        num_attempts=10,
+        num_attempts=1,
         sock=SocketRelay(("localhost", int(os.getenv("SOCKET_SERVER_PORT")))),
         timestep=0.05)
         

@@ -71,7 +71,7 @@ class Genetic:
 
     def mutate_with_noise(self):
         for i in range(self.depth):
-            layer_shape = self.layers[i]['weight'].shape()
+            layer_shape = self.layers[i]['weight'].shape
             w_mess = np.random.normal(size=layer_shape, scale=np.amax(self.layers[i]['weight']) * self.noise)
             b_mess = np.random.normal(size=layer_shape, scale=np.amax(self.layers[i]['bias']) * self.noise)
             self.layers[i]['weight'] = np.add(self.layers[i]['weight'], w_mess)
