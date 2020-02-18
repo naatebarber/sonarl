@@ -6,14 +6,21 @@ from agents.genetic.src.Runner import Runner
 import os
 from env import SonarWithAccelerometerBarometer as Sonar
 import env
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 
 if __name__ == "__main__":
     num_episodes = 100
 
-    with tf.Session() as sess:
-        runner = Runner(sess, Sonar, Genetic, 4, 50, 0.1, 100, 10, SocketRelay(("localhost", int(os.getenv("SOCKET_SERVER_PORT")))), timestep=0.01)
-        for i in range(num_episodes):
-            runner.run_gen()
-        plt.plot(runner.total_fitness_store)
-        plt.show()
+    runner = Runner(
+        env=Sonar, 
+        genetic=Genetic, 
+        init_hidden_layers=4, 
+        init_layer_units=50, 
+        gaussian_noise=0.1, 
+        gen_size=100,
+        num_attempts=10,
+        sock=SocketRelay(("localhost", int(os.getenv("SOCKET_SERVER_PORT")))),
+        timestep=0.05)
+        
+    for i in range(num_episodes):
+        runner.run_gen()

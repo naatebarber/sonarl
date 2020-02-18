@@ -5,9 +5,19 @@ import os
 import time
 
 class Runner:
-    def __init__(self, sess, env, genetic, init_hidden_layers, init_layer_units, gaussian_noise, gen_size, num_attempts, sock, timestep=None):
+    def __init__(
+            self, 
+            env=None, 
+            genetic=None, 
+            init_hidden_layers=3, 
+            init_layer_units=10, 
+            gaussian_noise=0.2, 
+            gen_size=100, 
+            num_attempts=10, 
+            sock=None, 
+            timestep=None):
+
         self.env = env
-        self.sess = sess
         self.genetic = genetic
         self.gen_size = gen_size
         self.num_attempts_per_genetic = num_attempts
@@ -25,6 +35,7 @@ class Runner:
         self.gen_envs = None
         self.gen_ordi = None
         self.gen_fitness = None
+        self.generation = 0
         # refine
         self.last_gen_fittest = None
         self.total_fitness_store = []
@@ -58,27 +69,32 @@ class Runner:
         # run generation
         for _ in range(self.num_attempts_per_genetic):
             eliminated = 0
-            while eliminated <= len(self.gen):
+            while True:
                 if self.timestep is not None:
-                    # only send visual updates if a timestep is enabled
                     time.sleep(self.timestep)
-                    self.sock.send_step({
-                        "env_action": "step",
-                        "data": [None, float(np.sum(self.gen_fitness)), None]
-                    })
                 for i in range(len(self.gen_envs)):
                     if self.gen_ordi[i][2] is True:
                         continue
 
                     observation, reward, done = self.gen_envs[i].step(
-                        self.gen[i].predict(
-                            self.gen_ordi[i][0]))
+                        int(np.argmax(
+                            self.gen[i].predict(
+                                self.gen_ordi[i][0]))))
 
                     self.gen_ordi[i] = [observation, reward, done]
                     self.gen_fitness[i] += reward
 
                     if done is True:
                         eliminated += 1
+                        print("{} out of {} eliminated in generation {}".format(eliminated, len(self.gen), self.generation))
+                        if eliminated is self.gen_size: 
+                            break
+
+                self.sock.send_step({
+                    "env_action": "step",
+                    "agent_type": "genetic",
+                    "position": [[float(i) for i in e.position] for e in self.gen_envs]
+                })
 
         # record total score
         self.total_fitness_store.append(np.sum(self.gen_fitness))
@@ -86,3 +102,5 @@ class Runner:
         # pull out top ten percent
         top = sorted([ (x, i) for (i, x) in enumerate(self.gen_fitness) ], reverse=True)
         self.last_gen_fittest = [ gen[i[1]] for i in top ]
+        print("Generation {} finished".format(self.generation))
+        self.generation += 1

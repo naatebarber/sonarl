@@ -157,9 +157,12 @@ class SonarWithAccelerometerBarometer:
         self.velocity[0] += math.floor(delta_vx * 100) / 100
         self.velocity[1] += math.floor(delta_vy * 100) / 100
         self.velocity[2] += math.floor(delta_vz * 100) / 100
-
+        
+        '''
+        print(action)
         print(self.velocity)
         print(self.position)
+        '''
 
         # update position vector
         for i in range(len(self.velocity)): self.position[i] += self.velocity[i]

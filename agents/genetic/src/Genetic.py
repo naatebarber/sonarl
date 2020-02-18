@@ -60,13 +60,13 @@ class Genetic:
 
         prediction = state
         for i in range(self.depth):
-            print(self.layers[i]['weight'].shape)
+            # print(self.layers[i]['weight'].shape)
             weighted = np.matmul(prediction, self.layers[i]['weight'])
             if self.layers[i]['bias'] is None:
                 self.layers[i]['bias'] = np.random.normal(size=weighted.shape)
             prediction = self.layers[i]['activation'](np.add(weighted, self.layers[i]['bias']))
             
-        print(prediction, self.softmax(prediction))
+        # print(prediction, self.softmax(prediction))
         return self.sigmoid(prediction)
 
     def mutate_with_noise(self):
