@@ -3,6 +3,7 @@ import numpy as np
 from .SocketRelay import SocketRelay
 import os
 import time
+import math
 
 class Runner:
     def __init__(
@@ -15,7 +16,8 @@ class Runner:
             gen_size=100, 
             num_attempts=10, 
             sock=None, 
-            timestep=None):
+            timestep=None,
+            cutoff=1000):
 
         self.env = env
         self.genetic = genetic
@@ -36,6 +38,7 @@ class Runner:
         self.gen_ordi = None
         self.gen_fitness = None
         self.generation = 0
+        self.cutoff = cutoff
         # refine
         self.last_gen_fittest = None
         self.total_fitness_store = []
@@ -69,7 +72,9 @@ class Runner:
         # run generation
         for _ in range(self.num_attempts_per_genetic):
             eliminated = 0
+            n_steps = 0
             while True:
+                n_steps += 1
                 if self.timestep is not None:
                     time.sleep(self.timestep)
                 for i in range(len(self.gen_envs)):
@@ -88,7 +93,7 @@ class Runner:
                     if done is True:
                         eliminated += 1
                         print("{} out of {} eliminated in generation {}".format(eliminated, len(self.gen), self.generation))
-                if eliminated is self.gen_size: 
+                if eliminated is self.gen_size or n_steps > self.cutoff: 
                     self.gen_ordi = []
                     for k in range(self.gen_size):
                         reset_ordi = self.gen_envs[k].reset()
@@ -106,6 +111,6 @@ class Runner:
 
         # pull out top ten percent
         top = sorted([ (x, i) for (i, x) in enumerate(self.gen_fitness) ], reverse=True)
-        self.last_gen_fittest = [ self.gen[i[1]] for i in top ]
+        self.last_gen_fittest = [ self.gen[i[1]] for i in top ][:(math.floor(self.gen_size / 10))]
         print("Generation {} finished".format(self.generation))
         self.generation += 1
