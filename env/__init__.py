@@ -1,2 +1,2 @@
 from .SonarWithAccelerometerBarometer import SonarWithAccelerometerBarometer
-from .EnvSocketWrapper import EnvSocketWrapper
+from .DeepQEnvSocketWrapper import DeepQEnvSocketWrapper

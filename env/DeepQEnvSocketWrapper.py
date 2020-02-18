@@ -1,7 +1,7 @@
 import socket
 import json
 
-class EnvSocketWrapper:
+class DeepQEnvSocketWrapper:
     def __init__(self, address, env):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect(address)
@@ -11,6 +11,7 @@ class EnvSocketWrapper:
         ordi = self.env.step(action)
         self.socket.send(bytes(json.dumps({
             "env_action": "step",
+            "agent_type": "deep_q",
             "data": ordi,
             "position": [ float(i) for i in self.env.position ]
         }), "utf-8"))

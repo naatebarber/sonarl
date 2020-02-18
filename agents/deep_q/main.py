@@ -1,5 +1,5 @@
 from env import SonarWithAccelerometerBarometer
-from env import EnvSocketWrapper
+from env import DeepQEnvSocketWrapper
 import src
 import os
 import json
@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 if __name__ == "__main__":
     env_worker = SonarWithAccelerometerBarometer()
     env_address = ("localhost", int(os.getenv("SOCKET_SERVER_PORT")))
-    env = EnvSocketWrapper(env_address, env_worker)
+    env = DeepQEnvSocketWrapper(env_address, env_worker)
     reset_ordi = env.reset()
 
     num_states = 6

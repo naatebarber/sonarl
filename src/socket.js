@@ -8,16 +8,14 @@ const initializeSocketServer = conf => {
             sock.on("data", packet => {
                 try {
                     var { graphWs, threeWs } = conf;
-                    const { env_action, data, position } = JSON.parse(packet.toString("utf-8"));
+                    const { agent_type, env_action, data, position } = JSON.parse(packet.toString("utf-8"));
                     // data  = [observation, reward, done]
-                    if(env_action == "step") {
-
+                    if(agent_type == "deep_q" && env_action == "step") {
                         let graphData = {
                             graph: {
                                 reward: Math.floor( 1000 * data[1] ) / 1000,
                             }
                         }
-
                         let threeData = {
                             vector: Array.isArray(position[0]) ? position : [position],
                             done: data[2]
@@ -32,9 +30,12 @@ const initializeSocketServer = conf => {
 
                         if(graphWs && typeof data[1] == "number") graphWs.send(JSON.stringify(graphData));
                         if(threeWs) threeWs.send(JSON.stringify(threeData));
+                    } else if(agent_type == "genetic" && env_action == "step") {
+                        let threeData = {
+                            vector: position
+                        }
+                        if(threeWs) threeWs.send(JSON.stringify(threeData))
                     }
-
-
                 } catch(err) {
                     console.log("Error recv agent-sock data: " + err)
                 }

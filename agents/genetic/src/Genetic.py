@@ -37,36 +37,36 @@ class Genetic:
         if self.layers is None:
             self.layers = []
             for i in range(self.depth):
-                dim1 = None
-                dim2 = None
+                weight_shape = None
                 activ = None
                 if i is 0:
-                    dim1 = self.n_states
-                    dim2 = self.width
+                    weight_shape = [self.n_states, self.width]
                     activ = self.pick_random_activation()
                 elif i is self.depth - 1:
-                    dim1 = self.width
-                    dim2 = self.n_actions
+                    weight_shape = [self.width, self.n_actions]
                     activ = self.pick_random_activation()
                 else:
-                    dim1 = self.width
-                    dim2 = self.width
+                    weight_shape = [self.width, self.width]
                     activ = self.pick_random_activation()
 
                 self.layers.append({
                     "activation": activ,
-                    "weight": np.random.normal(size=[dim1, dim2]),
-                    "bias": np.random.normal(size=[dim1, dim2])
+                    "weight": np.random.normal(size=weight_shape),
+                    "bias": None
                 })         
 
         if self.logits is None:
-            self.logits = np.random.rand(*[1, self.width])
+            self.logits = np.random.normal(size=[1, self.width])
 
         prediction = state
         for i in range(self.depth):
             print(self.layers[i]['weight'].shape)
-            prediction = self.layers[i]['activation'](np.add(np.matmul(prediction, self.layers[i]['weight']), self.layers[i]['bias']))
-        prediction = np.matmul(self.logits, prediction)
+            weighted = np.matmul(prediction, self.layers[i]['weight'])
+            if self.layers[i]['bias'] is None:
+                self.layers[i]['bias'] = np.random.normal(size=weighted.shape)
+            prediction = self.layers[i]['activation'](np.add(weighted, self.layers[i]['bias']))
+            
+        print(prediction, self.softmax(prediction))
         return self.sigmoid(prediction)
 
     def mutate_with_noise(self):
