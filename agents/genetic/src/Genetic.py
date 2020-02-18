@@ -1,80 +1,79 @@
-import tensorflow as tf
 import numpy as np
 
 class Genetic:
-    def __init__(self, num_states, num_actions, num_hidden=4, num_units=50, gamma=0.3, dense_layers=None):
-        # define shapes
-        self.num_states = num_states
-        self.num_actions = num_actions
-        self.num_hidden = num_hidden
-        self.num_units = num_units
-        # input placeholder
-        self.states = None
-        # hidden layers
-        self.hidden = None
-        self.action_layer = None
-        self.logits = None
-        # mutation rate
-        self.gamma = gamma
-        # mutated weights
-        self.dense_layers = dense_layers
-        # build model
-        self.genes = self.define_genome()
-        self.var_init = None
+    def __init__(self, n_states, n_actions, depth, width, noise=None, layers=None, logits=None):
+        self.n_states = n_states
+        self.n_actions = n_actions
+        self.width = width
+        self.depth = depth
+        self.noise = noise
+        self.layers = layers
+        self.logits = logits
 
-    def define_genome(self):
-        self.states = tf.placeholder(tf.float32, shape=[None, self.num_states])
-        self.hidden = []
-        if self.dense_layers is None:
-            for i in range(self.num_hidden):
-                if i is 0:
-                    self.hidden.append({
-                        "activation": tf.nn.relu,
-                        "weight": tf.Variable(
-                            initial_value=tf.random_normal([self.num_states, self.num_units]), 
-                            dtype=tf.float32),
-                        "bias": tf.Variable(
-                            initial_value=tf.random_normal([self.num_states, self.num_units]), 
-                            dtype=tf.float32)
-                    })
-                else:
-                    self.hidden.append({
-                        "activation": tf.nn.relu,
-                        "weight": tf.Variable(
-                            initial_value=tf.random_normal([self.num_units, self.num_units]), 
-                            dtype=tf.float32),
-                        "bias": tf.Variable(
-                            initial_value=tf.random_normal([self.num_units, self.num_units]), 
-                            dtype=tf.float32)
-                    })
+    def sigmoid(self, x):
+        return 1. / (1 + np.exp(-x))
+
+    def softmax(self, x):
+        e = np.exp(x - np.max(x))
+        if e.ndim == 1:
+            return e / np.sum(e, axis=0)
         else:
-            self.hidden = self.dense_layers
-        # action layer outputs logits
-        self.action_layer = {
-            "weight": tf.Variable(
-                initial_value=tf.random_normal([self.num_units, self.num_actions]), 
-                dtype=tf.float32),
-            "bias": tf.Variable(
-                initial_value=tf.random_normal([self.num_units, self.num_actions]), 
-                dtype=tf.float32)
-        }
+            return e / np.array([np.sum(e, axis=1)]).T
 
-        # matrix feed for logits
-        for i in range(len(self.hidden)):
-            if i is 0:
-                self.logits = self.hidden[i].activation(tf.add(tf.matmul(self.states, self.hidden[i].weight), self.hidden[i].bias))
-            else:
-                self.logits = self.hidden[i].activation(tf.add(tf.matmul(self.logits, self.hidden[i].weight), self.hidden[i].bias))
+    def relu(self, x):
+        return x * (x > 0)
 
-        # reshape to action
-        self.logits = tf.add(tf.matmul(self.logits, self.action_layer.weight), self.action_layer.bias)
-        self.var_init = tf.global_variables_initializer()
+    def tanh(self, x):
+        return np.tanh(x)
 
-    def predict(self, sess, state):
-        return sess.run(self.logits, {self.states: state})
+    def null_activation(self, x):
+        return x
 
-    def mutate(self):
-        pass
+    def pick_random_activation(self):
+        activations = [self.sigmoid, self.softmax, self.relu, self.tanh]
+        return activations[np.random.randint(0, len(activations))]
 
-    def cross(self):
-        pass
+    def predict(self, state):
+        if self.layers is None:
+            self.layers = []
+            for i in range(self.depth):
+                dim1 = None
+                dim2 = None
+                activ = None
+                if i is 0:
+                    dim1 = self.n_states
+                    dim2 = self.width
+                    activ = self.pick_random_activation()
+                elif i is self.depth - 1:
+                    dim1 = self.width
+                    dim2 = self.n_actions
+                    activ = self.pick_random_activation()
+                else:
+                    dim1 = self.width
+                    dim2 = self.width
+                    activ = self.pick_random_activation()
+
+                self.layers.append({
+                    "activation": activ,
+                    "weight": np.random.normal(size=[dim1, dim2]),
+                    "bias": np.random.normal(size=[dim1, dim2])
+                })         
+
+        if self.logits is None:
+            self.logits = np.random.rand(*[1, self.width])
+
+        prediction = state
+        for i in range(self.depth):
+            print(self.layers[i]['weight'].shape)
+            prediction = self.layers[i]['activation'](np.add(np.matmul(prediction, self.layers[i]['weight']), self.layers[i]['bias']))
+        prediction = np.matmul(self.logits, prediction)
+        return self.sigmoid(prediction)
+
+    def mutate_with_noise(self):
+        for i in range(self.depth):
+            layer_shape = self.layers[i]['weight'].shape()
+            w_mess = np.random.normal(size=layer_shape, scale=np.amax(self.layers[i]['weight']) * self.noise)
+            b_mess = np.random.normal(size=layer_shape, scale=np.amax(self.layers[i]['bias']) * self.noise)
+            self.layers[i]['weight'] = np.add(self.layers[i]['weight'], w_mess)
+            self.layers[i]['bias'] = np.add(self.layers[i]['bias'], b_mess)
+        return Genetic(self.n_states, self.n_actions, self.depth, self.width, self.noise, self.layers, self.logits)

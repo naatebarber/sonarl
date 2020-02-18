@@ -4,12 +4,12 @@ from .SocketRelay import SocketRelay
 import os
 
 class Runner:
-    def __init__(self, sess, env, organism, init_hidden_layers, init_layer_units, gaussian_noise, gen_size, num_attempts):
+    def __init__(self, sess, env, genetic, init_hidden_layers, init_layer_units, gaussian_noise, gen_size, num_attempts):
         self.env = env
         self.sess = sess
-        self.organism = organism
+        self.genetic = genetic
         self.gen_size = gen_size
-        self.num_attempts_per_organism = num_attempts
+        self.num_attempts_per_genetic = num_attempts
         self.sock = SocketRelay(("localhost", int(os.getenv("SOCKET_SERVER_PORT"))))
         # env layout
         self.num_states = self.env.get_num_states()
@@ -43,7 +43,7 @@ class Runner:
         if self.last_gen_fittest is None:
             for i in range(self.gen_size):
                 self.gen.append(
-                    self.organism(self.num_states, self.num_actions, self.layers, self.units, self.noise))
+                    self.genetic(self.num_states, self.num_actions, self.layers, self.units, self.noise))
         else:
             for i in range(len(self.last_gen_fittest)):
                 for _ in range(10):
@@ -54,14 +54,18 @@ class Runner:
         self.gen_fitness = np.zeros([len(self.gen)])
 
         # run generation
-        for _ in range(self.num_attempts_per_organism):
+        for _ in range(self.num_attempts_per_genetic):
             eliminated = 0
             while eliminated <= len(self.gen):
                 for i in range(len(self.gen_envs)):
                     if self.gen_ordi[i][2] is True:
                         continue
+                        
 
-                    observation, reward, done = self.gen_envs[i].step(self.gen_ordi[i])
+                    observation, reward, done = self.gen_envs[i].step(
+                                                    self.gen[i].predict(
+                                                        self.gen_ordi[i][0]))
+
                     self.gen_ordi[i] = [observation, reward, done]
                     self.gen_fitness[i] += reward
 
