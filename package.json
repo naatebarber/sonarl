@@ -5,7 +5,10 @@
   "repository": "git@github.com:naatebarber/pilot.git",
   "license": "MIT",
   "scripts": {
-    "test": "mocha **/*.test.js"
+    "test": "mocha **/*.test.js",
+    "start": "source .env && nodemon index.js",
+    "genetic": "source .env && python agents/genetic/main.py",
+    "deepq": "source .env && python agents/deep_q/main.py"
   },
   "dependencies": {
     "assert": "^2.0.0",
