@@ -1409,6 +1409,16 @@ term-size@^1.2.0:
   dependencies:
     execa "^0.7.0"
 
+three-orbitcontrols@^2.110.3:
+  version "2.110.3"
+  resolved "https://registry.yarnpkg.com/three-orbitcontrols/-/three-orbitcontrols-2.110.3.tgz#ca9c91d5ec2f4731a1140acf2ff0281e15988edf"
+  integrity sha512-BNNbksJwbN3/MmT0X/gjz5ZCchm7bjk26SUdtJYRxfEYjDfkb/0PeUTHE/KuyJ5vb/owK3mojyy3vcqDx99sRA==
+
+three@^0.113.2:
+  version "0.113.2"
+  resolved "https://registry.yarnpkg.com/three/-/three-0.113.2.tgz#04791d491fe4359330f9dbe7b767db18bfb35d67"
+  integrity sha512-x3vrKW41/UtbWbWduWKGlfIc043SvHWr3YltehYq+UGb9YglQ2oztNGvl2eut05JtNSmP11Mh3t6Xak5/0e+Fg==
+
 timed-out@^4.0.0:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/timed-out/-/timed-out-4.0.1.tgz#f32eacac5a175bea25d7fab565ab3ed8741ef56f"

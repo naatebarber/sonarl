@@ -17,7 +17,8 @@ class Runner:
             num_attempts=10, 
             sock=None, 
             timestep=None,
-            cutoff=1000):
+            cutoff=1000,
+            skip=100):
 
         self.env = env
         self.genetic = genetic
@@ -39,6 +40,8 @@ class Runner:
         self.gen_fitness = None
         self.generation = 0
         self.cutoff = cutoff
+        self.skip = skip
+        self.num_episodes = 0
         # refine
         self.last_gen_fittest = None
         self.total_fitness_store = []
@@ -75,7 +78,7 @@ class Runner:
             n_steps = 0
             while True:
                 n_steps += 1
-                if self.timestep is not None:
+                if self.timestep is not None and self.num_episodes > self.skip:
                     time.sleep(self.timestep)
                 for i in range(len(self.gen_envs)):
                     if self.gen_ordi[i][2] is True:
@@ -99,15 +102,16 @@ class Runner:
                         reset_ordi = self.gen_envs[k].reset()
                         self.gen_ordi.append(reset_ordi)
                     break
-
-                self.sock.send_step({
-                    "env_action": "step",
-                    "agent_type": "genetic",
-                    "position": [[float(i) for i in e.position] for e in self.gen_envs]
-                })
+                if self.num_episodes > self.skip:
+                    self.sock.send_step({
+                        "env_action": "step",
+                        "agent_type": "genetic",
+                        "position": [[float(i) for i in e.position] for e in self.gen_envs]
+                    })
 
         # record total score
         self.total_fitness_store.append(np.sum(self.gen_fitness))
+        self.num_episodes += 1
 
         # pull out top ten percent
         top = sorted([ (x, i) for (i, x) in enumerate(self.gen_fitness) ], reverse=True)

@@ -22,12 +22,10 @@ app.use(express.static(__dirname + "/ui"))
         socketServerConf.threeWs = ws;
         console.log("Simulation connection made");
     })
-    .post("/run-agent", (req, res) => {
-        let agentSession = spawn("python", [__dirname + "/agent/main.py"]),
-            log = '';
-        agentSession.stdout.on("data", data => log += data.toString("utf-8").replace(/\n/g, "<br>"))
-        agentSession.on("exit", () => {
-            res.send(log);
-        });
+    .get("/three-orbit", (req, res) => {
+        res.sendFile(__dirname + "/node_modules/three-orbitcontrols/OrbitControls.js")
+    })
+    .get("/three", (req, res) => {
+        res.sendFile(__dirname + "/node_modules/three/src/Three.js")
     })
     .listen(process.env.GUI_PORT, () => console.log("GUI running on " + process.env.GUI_PORT))
