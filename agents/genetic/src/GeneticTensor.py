@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-
+# Deprecated but still interesting
 class GeneticTensor:
     def __init__(self, num_states, num_actions, num_hidden=4, num_units=50, gamma=0.3, dense_layers=None):
         # define shapes

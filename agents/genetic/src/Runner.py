@@ -65,9 +65,19 @@ class Runner:
                     self.genetic(self.num_states, self.num_actions, self.layers, self.units, self.noise))
         else:
             for i in range(len(self.last_gen_fittest)):
-                for _ in range(10):
+                # 50 crossover genes and 50 noise mutated genes
+                for _ in range(len(self.last_gen_fittest) * 10):
+                    # if i > len(self.last_gen_fittest) * 5:
                     self.gen.append(
                         self.last_gen_fittest[i].mutate_with_noise())
+                    # else:
+                    #     # top fifty percent of the top ten percent
+                    #     # top five percent
+                    #     sample_space = self.last_gen_fittest[:int(np.floor((len(self.last_gen_fittest) / 2)))]
+                    #     gene1 = np.random.choice(sample_space)
+                    #     gene2 = np.random.choice(sample_space)
+                    #     crossed_gene = (gene1.layer_random_cross(gene2)) if np.random.rand() < 0.5 else (gene2.layer_random_cross(gene1))
+                    #     self.gen.append(crossed_gene)
         
         # populate fitness array
         self.gen_fitness = np.zeros([len(self.gen)])
