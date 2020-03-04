@@ -80,7 +80,7 @@ class Genetic:
         return Genetic(self.n_states, self.n_actions, self.depth, self.width, self.noise * 0.99, self.layers, self.logits)
 
     def layer_random_cross(self, other):
-        # assumes uniform middle layer shape. does not work
+        # assumes uniform layer shape. does not work
         genetic_layers = []
         for i in range(len(self.layers)):
             genetic_layers.append(self.layers[i])
