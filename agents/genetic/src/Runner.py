@@ -12,7 +12,8 @@ class Runner:
             genetic=None, 
             init_hidden_layers=3, 
             init_layer_units=10, 
-            gaussian_noise=0.2, 
+            gaussian_noise=0.2,
+            epsilon=0.5, 
             gen_size=100, 
             num_attempts=10, 
             sock=None, 
@@ -45,6 +46,8 @@ class Runner:
         # refine
         self.last_gen_fittest = None
         self.total_fitness_store = []
+        self.percentage_survive = 5
+        self.epsilon = epsilon
 
     def run_gen(self):
         self.gen = []
@@ -64,20 +67,20 @@ class Runner:
                 self.gen.append(
                     self.genetic(self.num_states, self.num_actions, self.layers, self.units, self.noise))
         else:
+            children = 0
+            mutations = 0
             for i in range(len(self.last_gen_fittest)):
-                # 50 crossover genes and 50 noise mutated genes
-                for _ in range(len(self.last_gen_fittest) * 10):
-                    # if i > len(self.last_gen_fittest) * 5:
-                    self.gen.append(
-                        self.last_gen_fittest[i].mutate_with_noise())
-                    # else:
-                    #     # top fifty percent of the top ten percent
-                    #     # top five percent
-                    #     sample_space = self.last_gen_fittest[:int(np.floor((len(self.last_gen_fittest) / 2)))]
-                    #     gene1 = np.random.choice(sample_space)
-                    #     gene2 = np.random.choice(sample_space)
-                    #     crossed_gene = (gene1.layer_random_cross(gene2)) if np.random.rand() < 0.5 else (gene2.layer_random_cross(gene1))
-                    #     self.gen.append(crossed_gene)
+                for _ in range(math.floor(self.gen_size / self.percentage_survive)):
+                    if np.random.uniform() < self.epsilon:
+                        self.gen.append(
+                            self.last_gen_fittest[i].mutate_with_noise())
+                        mutations += 1
+                    else:
+                        any_other_fit_gene = self.last_gen_fittest[np.random.randint(0, len(self.last_gen_fittest))]
+                        self.gen.append(
+                            self.last_gen_fittest[i].child(any_other_fit_gene))
+                        children += 1
+            print("Spawned {} children and mutated {} individuals".format(children, mutations))
         
         # populate fitness array
         self.gen_fitness = np.zeros([len(self.gen)])
@@ -105,7 +108,7 @@ class Runner:
 
                     if done is True:
                         eliminated += 1
-                        print("{} out of {} eliminated in generation {}".format(eliminated, len(self.gen), self.generation))
+                        # print("{} out of {} eliminated in generation {}".format(eliminated, len(self.gen), self.generation))
                 if eliminated is self.gen_size or n_steps > self.cutoff: 
                     self.gen_ordi = []
                     for k in range(self.gen_size):
@@ -122,9 +125,10 @@ class Runner:
         # record total score
         self.total_fitness_store.append(np.sum(self.gen_fitness))
         self.num_episodes += 1
+        self.epsilon = self.epsilon * 0.95
 
         # pull out top ten percent
         top = sorted([ (x, i) for (i, x) in enumerate(self.gen_fitness) ], reverse=True)
-        self.last_gen_fittest = [ self.gen[i[1]] for i in top ][:(math.floor(self.gen_size / 10))]
-        print("Generation {} finished".format(self.generation))
+        self.last_gen_fittest = [ self.gen[i[1]] for i in top ][:(math.floor(self.gen_size * (self.percentage_survive / 100)))]
+        print("Generation {} finished with {} total reward\n".format(self.generation, np.sum(self.gen_fitness)))
         self.generation += 1

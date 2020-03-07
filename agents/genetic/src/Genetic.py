@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 class Genetic:
     def __init__(self, n_states, n_actions, depth, width, noise=None, layers=None, logits=None):
@@ -77,23 +78,64 @@ class Genetic:
             b_mess = np.random.normal(size=bias_shape, scale=np.amax(self.layers[i]['bias']) * self.noise)
             self.layers[i]['weight'] = np.add(self.layers[i]['weight'], w_mess)
             self.layers[i]['bias'] = np.add(self.layers[i]['bias'], b_mess)
-        return Genetic(self.n_states, self.n_actions, self.depth, self.width, self.noise * 0.99, self.layers, self.logits)
+        return Genetic(self.n_states, self.n_actions, self.depth, self.width, self.noise * 0.97, self.layers, self.logits)
 
-    def layer_random_cross(self, other):
-        # assumes uniform layer shape. does not work
-        genetic_layers = []
+    def _layer_shapes(self):
+        shapes = []
         for i in range(len(self.layers)):
-            genetic_layers.append(self.layers[i])
-        for i in range(len(other.layers)):
-            genetic_layers.append(other.layers[i])
+            shapes.append(
+                (self.layers[i]['weight'].shape, self.layers[i]['bias'].shape))
+        return shapes
 
-        print(len(genetic_layers))
-        avg_layers = int(np.floor( (len(other.layers) + len(self.layers)) / 2))
-        new_genetic_layers = []
-        for i in range(avg_layers):
-            chosen_layer = int(np.random.randint(0, len(genetic_layers)))
-            new_genetic_layers.append(genetic_layers[chosen_layer])
-            del genetic_layers[chosen_layer]
-            if len(genetic_layers) < 1: break
-        logits = self.logits if np.random.rand() > 0.5 else other.logits
-        return Genetic(self.n_states, self.n_actions, self.depth, self.width, self.noise * (self.noise * 2), layers=new_genetic_layers, logits=self.logits)
+    def child(self, other):
+        layers = []
+        logits = None
+        if self._layer_shapes() == other._layer_shapes():
+            for i in range(len(self.layers)):
+                shape_w = self.layers[i]['weight'].shape
+                flat1_w = self.layers[i]['weight'].flatten()
+                flat2_w = other.layers[i]['weight'].flatten()
+                shape_b = self.layers[i]['bias'].shape
+                flat1_b = self.layers[i]['bias'].flatten()
+                flat2_b = other.layers[i]['bias'].flatten()
+
+                child_w = []
+                child_b = []
+
+                for j in range(len(flat1_w)):
+                    order = sorted([flat1_w[j], flat2_w[j]])
+                    child_node = np.random.uniform(order[0], order[1])
+                    child_w.append(child_node)
+                j = 0
+                
+                for j in range(len(flat1_b)):
+                    order = sorted([flat1_b[j], flat2_b[j]])
+                    child_node = np.random.uniform(order[0], order[1])
+                    child_b.append(child_node)
+
+                layers.append({
+                    "activation": self.layers[i]['activation'],
+                    "weight": np.array(child_w).reshape(shape_w),
+                    "bias": np.array(child_b).reshape(shape_b)
+                })
+
+            child_logits = []
+            shape_logits = self.logits.shape
+            flat1_logits = self.logits.flatten()
+            flat2_logits = other.logits.flatten()
+
+            for i in range(len(flat1_logits)):
+                order = sorted([flat1_logits[i], flat2_logits[i]])
+                child_node = np.random.uniform(order[0], order[1])
+                child_logits.append(child_node)
+
+            return Genetic(
+                self.n_states, 
+                self.n_actions, 
+                self.depth, 
+                self.width, 
+                self.noise * 0.97, 
+                layers, 
+                np.array(child_logits).reshape(shape_logits))
+        else:
+            return self.mutate_with_noise()
