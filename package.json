@@ -17,7 +17,7 @@
     "express-ws": "^4.0.0",
     "mocha": "^7.0.1",
     "nodemon": "^2.0.2",
-    "three": "^0.113.2",
+    "three": "^0.125.0",
     "three-orbitcontrols": "^2.110.3"
   }
 }
